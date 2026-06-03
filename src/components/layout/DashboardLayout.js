@@ -87,6 +87,40 @@ export default function DashboardLayout({ children }) {
     fetchUserDetails();
   }, [userId]);
 
+  React.useEffect(() => {
+    const handleKeyDown = (event) => {
+      const activeEl = document.activeElement;
+      if (
+        activeEl &&
+        (activeEl.tagName === "INPUT" ||
+          activeEl.tagName === "TEXTAREA" ||
+          activeEl.tagName === "SELECT" ||
+          activeEl.isContentEditable)
+      ) {
+        return;
+      }
+
+      if (event.shiftKey) {
+        const key = event.key.toLowerCase();
+        if (key === "d") {
+          event.preventDefault();
+          router.push("/");
+        } else if (key === "p") {
+          event.preventDefault();
+          router.push("/projects");
+        } else if (key === "t") {
+          event.preventDefault();
+          router.push("/tasks");
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [router]);
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     dispatch(apiSlice.util.resetApiState());
@@ -173,6 +207,73 @@ export default function DashboardLayout({ children }) {
           );
         })}
       </List>
+
+      <Box
+        sx={{
+          mx: 2.5,
+          mb: 2,
+          p: 2,
+          bgcolor: "action.hover",
+          borderRadius: 2,
+          border: "1px dashed",
+          borderColor: "divider",
+        }}
+      >
+        <Typography
+          variant="caption"
+          fontWeight="bold"
+          color="text.secondary"
+          sx={{
+            display: "block",
+            mb: 1.5,
+            textTransform: "uppercase",
+            letterSpacing: "0.5px",
+          }}
+        >
+          Keyboard Shortcuts
+        </Typography>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+          {[
+            { keys: "Shift + D", label: "Dashboard" },
+            { keys: "Shift + P", label: "Projects" },
+            { keys: "Shift + T", label: "Tasks" },
+          ].map((shortcut) => (
+            <Box
+              key={shortcut.keys}
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                fontSize="0.75rem"
+              >
+                {shortcut.label}
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{
+                  bgcolor: "background.paper",
+                  px: 0.75,
+                  py: 0.25,
+                  borderRadius: 1,
+                  border: "1px solid",
+                  borderColor: "divider",
+                  fontSize: "0.675rem",
+                  fontFamily: "monospace",
+                  fontWeight: "bold",
+                  color: "text.primary",
+                }}
+              >
+                {shortcut.keys}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+      </Box>
 
       <List sx={{ px: 2, pb: 2 }}>
         <ListItem disablePadding>
