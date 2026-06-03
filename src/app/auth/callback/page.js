@@ -1,34 +1,47 @@
 "use client";
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "../../../utils/supabase";
 import { Box, CircularProgress, Typography } from "@mui/material";
 
-export default function AuthCallback() {
+function VerifyEmailLogic() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
-    // The Supabase client automatically picks up the ?code= or #access_token= from the URL
-    // and establishes the session. We just need to wait for it and redirect.
     const handleEmailVerify = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      
-      if (error) {
-        console.error("Auth error:", error);
-        router.push("/auth");
-        return;
-      }
+      // 1. Grab the TokenHash from the URL (your template named it 'code')
+      const token_hash = searchParams.get("code");
 
-      if (session) {
+      if (token_hash) {
+        // 2. Explicitly verify the token
+        const { data, error } = await supabase.auth.verifyOtp({
+          token_hash,
+          type: "signup", // 'signup' is the required type for email confirmation
+        });
+
+        if (error) {
+          console.error("Verification error:", error.message);
+          router.push("/auth"); // Optionally add ?error=failed to show a toast on the login page
+          return;
+        }
+
+        // 3. Verification successful! User is automatically logged in.
         router.push("/tasks");
       } else {
-        // Fallback just in case it takes a second
-        setTimeout(() => router.push("/tasks"), 2000);
+        // Fallback: If there is no token in the URL, check if they are already logged in
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (session) {
+          router.push("/tasks");
+        } else {
+          router.push("/auth");
+        }
       }
     };
 
     handleEmailVerify();
-  }, [router]);
+  }, [router, searchParams]);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100vh", alignItems: "center", justifyContent: "center", bgcolor: "#fafafa" }}>
@@ -37,5 +50,18 @@ export default function AuthCallback() {
         Verifying your email...
       </Typography>
     </Box>
+  );
+}
+
+// Wrap in Suspense to prevent Next.js client-side de-opt build warnings
+export default function AuthCallback() {
+  return (
+    <Suspense fallback={
+      <Box sx={{ display: "flex", height: "100vh", alignItems: "center", justifyContent: "center" }}>
+        <CircularProgress />
+      </Box>
+    }>
+      <VerifyEmailLogic />
+    </Suspense>
   );
 }

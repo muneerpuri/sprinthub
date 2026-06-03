@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Box, Button, TextField, Typography, Paper, Grid } from "@mui/material";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
@@ -16,6 +16,16 @@ export default function AuthPage() {
     email: "",
     password: "",
   });
+
+  useEffect(() => {
+    const checkLoggedUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        router.push("/tasks");
+      }
+    };
+    checkLoggedUser();
+  }, [router]);
 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });

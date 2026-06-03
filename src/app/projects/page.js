@@ -1,13 +1,12 @@
 // src/app/projects/page.js
 "use client";
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
     Box, Typography, Button, Grid, Card, CardContent,
-    CardActions, Chip, IconButton, Skeleton
+    Chip, Skeleton
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import { toast } from "react-toastify";
 
@@ -15,62 +14,40 @@ import DashboardLayout from "../../components/layout/DashboardLayout";
 import ProjectModal from "../../components/projects/ProjectModal";
 import {
     useGetProjectsQuery,
-    useAddProjectMutation,
-    useUpdateProjectMutation,
-    useDeleteProjectMutation
+    useAddProjectMutation
 } from "../../lib/apiSlice";
 
 export default function ProjectsPage() {
+    const router = useRouter();
     const { data: projects = [], isLoading } = useGetProjectsQuery();
     const [addProject] = useAddProjectMutation();
-    const [updateProject] = useUpdateProjectMutation();
-    const [deleteProject] = useDeleteProjectMutation();
 
     const [modalOpen, setModalOpen] = useState(false);
-    const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({ name: "", description: "", color: "#3b82f6", isArchived: false });
+
+    // Navigate to dedicated page
+    const handleOpenDetails = (projectId) => {
+        router.push(`/projects/${projectId}`);
+    };
 
     const handleOpenNew = () => {
         setFormData({ name: "", description: "", color: "#3b82f6", isArchived: false });
-        setIsEditing(false);
-        setModalOpen(true);
-    };
-
-    const handleOpenEdit = (project) => {
-        setFormData(project);
-        setIsEditing(true);
         setModalOpen(true);
     };
 
     const handleSave = async () => {
         try {
-            if (isEditing) {
-                await updateProject(formData).unwrap();
-                toast.success("Project updated!");
-            } else {
-                await addProject(formData).unwrap();
-                toast.success("Project created!");
-            }
+            await addProject(formData).unwrap();
+            toast.success("Project created!");
             setModalOpen(false);
         } catch (error) {
-            toast.error("An error occurred.");
-        }
-    };
-
-    const handleDelete = async (id) => {
-        if (window.confirm("Are you sure you want to delete this project? Tasks attached to it may be affected.")) {
-            try {
-                await deleteProject(id).unwrap();
-                toast.success("Project deleted");
-            } catch (error) {
-                toast.error("Failed to delete project");
-            }
+            console.error("Save error:", error); 
+            toast.error("An error occurred while saving.");
         }
     };
 
     return (
         <DashboardLayout>
-            {/* Header */}
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 4 }}>
                 <Box>
                     <Typography variant="h4" fontWeight="bold">Projects</Typography>
@@ -81,12 +58,11 @@ export default function ProjectsPage() {
                 </Button>
             </Box>
 
-            {/* Grid Content */}
             {isLoading ? (
                 <Grid container spacing={3}>
                     {[1, 2, 3].map((n) => (
                         <Grid item="true" size={{ xs: 12, sm: 6, md: 4 }} key={n}>
-                            <Skeleton variant="rounded" height={180} />
+                            <Skeleton variant="rounded" height={150} />
                         </Grid>
                     ))}
                 </Grid>
@@ -102,11 +78,13 @@ export default function ProjectsPage() {
                     {projects.map((project) => (
                         <Grid item="true" size={{ xs: 12, sm: 6, md: 4 }} key={project.id}>
                             <Card
+                                onClick={() => handleOpenDetails(project.id)}
                                 variant="outlined"
                                 sx={{
                                     height: "100%",
                                     display: "flex",
                                     flexDirection: "column",
+                                    cursor: "pointer",
                                     transition: "all 0.2s ease-in-out",
                                     '&:hover': {
                                         borderColor: project.color || 'primary.main',
@@ -115,7 +93,6 @@ export default function ProjectsPage() {
                                     }
                                 }}
                             >
-                                {/* Top Color Banner */}
                                 <Box sx={{ height: 6, width: "100%", bgcolor: project.color || "#3b82f6" }} />
 
                                 <CardContent sx={{ flexGrow: 1 }}>
@@ -137,34 +114,24 @@ export default function ProjectsPage() {
                                     </Typography>
                                 </CardContent>
 
-                                <Box sx={{ px: 2, pb: 1 }}>
+                                <Box sx={{ px: 2, pb: 2 }}>
                                     <Typography variant="caption" color="text.disabled">
                                         Created: {new Date(project.createdAt).toLocaleDateString()}
                                     </Typography>
                                 </Box>
-
-                                <CardActions sx={{ justifyContent: "flex-end", borderTop: "1px solid", borderColor: "divider", bgcolor: "background.default" }}>
-                                    <IconButton size="small" color="primary" onClick={() => handleOpenEdit(project)} title="Edit Project">
-                                        <EditIcon fontSize="small" />
-                                    </IconButton>
-                                    <IconButton size="small" color="error" onClick={() => handleDelete(project.id)} title="Delete Project">
-                                        <DeleteIcon fontSize="small" />
-                                    </IconButton>
-                                </CardActions>
                             </Card>
                         </Grid>
                     ))}
                 </Grid>
             )}
 
-            {/* Reusable Modal Component */}
             <ProjectModal
                 open={modalOpen}
                 onClose={() => setModalOpen(false)}
                 form={formData}
                 setForm={setFormData}
                 onSave={handleSave}
-                isEditing={isEditing}
+                isEditing={false}
             />
         </DashboardLayout>
     );

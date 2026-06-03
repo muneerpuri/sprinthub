@@ -65,7 +65,7 @@ export default function TaskDetailModal({ activeTask, setActiveTask, onClose, on
         <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
           <TextField label="Title" name="title" value={activeTask.title || ""} onChange={handleChange} fullWidth />
           
-          <Box display="flex" gap={2}>
+          <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 2 }}>
             <FormControl fullWidth>
               <InputLabel>Project</InputLabel>
               <Select name="projectId" value={activeTask.projectId || ""} label="Project" onChange={handleChange}>
@@ -88,7 +88,7 @@ export default function TaskDetailModal({ activeTask, setActiveTask, onClose, on
 
           <TextField label="Description" name="description" value={activeTask.description || ""} onChange={handleChange} fullWidth multiline rows={4} />
           
-          <Box display="flex" gap={2}>
+          <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 2 }}>
             <FormControl fullWidth>
               <InputLabel>Status</InputLabel>
               <Select name="status" value={activeTask.status || "PENDING"} label="Status" onChange={handleChange}>
@@ -107,7 +107,7 @@ export default function TaskDetailModal({ activeTask, setActiveTask, onClose, on
             </FormControl>
           </Box>
 
-          <Box display="flex" gap={2}>
+          <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 2 }}>
             <FormControl fullWidth>
               <InputLabel>Story Points</InputLabel>
               <Select 
@@ -156,7 +156,14 @@ export default function TaskDetailModal({ activeTask, setActiveTask, onClose, on
             ) : (
               comments.map((c) => (
                 <Box key={c.id} sx={{ mb: 2 }}>
-                  <Typography variant="caption" color="primary" fontWeight="bold">User</Typography>
+                  <Typography variant="caption" color="primary" fontWeight="bold">
+                    {c.owner ? `${c.owner.firstName} ${c.owner.lastName}` : "User"}
+                  </Typography>
+                  {c.owner?.email && (
+                    <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>
+                      ({c.owner.email})
+                    </Typography>
+                  )}
                   <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
                     {new Date(c.createdAt).toLocaleDateString()}
                   </Typography>
@@ -176,11 +183,17 @@ export default function TaskDetailModal({ activeTask, setActiveTask, onClose, on
 
       </DialogContent>
 
-      <DialogActions sx={{ p: 2, justifyContent: "space-between" }}>
-        <Button onClick={() => onDelete(activeTask)} color="error">Delete Task</Button>
-        <Box>
-          <Button onClick={onClose} color="inherit" sx={{ mr: 1 }}>Cancel</Button>
-          <Button onClick={onSave} variant="contained" color="primary">Save Changes</Button>
+      <DialogActions sx={{ 
+        p: 2, 
+        flexDirection: { xs: "column-reverse", sm: "row" }, 
+        gap: { xs: 1.5, sm: 0 },
+        justifyContent: "space-between",
+        alignItems: { xs: "stretch", sm: "center" }
+      }}>
+        <Button onClick={() => onDelete(activeTask)} color="error" fullWidth sx={{ width: { sm: "auto" } }}>Delete Task</Button>
+        <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 1, width: { xs: "100%", sm: "auto" } }}>
+          <Button onClick={onClose} color="inherit" fullWidth sx={{ mr: { sm: 1 } }}>Cancel</Button>
+          <Button onClick={onSave} variant="contained" color="primary" fullWidth>Save Changes</Button>
         </Box>
       </DialogActions>
     </Dialog>

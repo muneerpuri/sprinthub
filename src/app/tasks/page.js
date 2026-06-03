@@ -47,6 +47,13 @@ export default function Tasks() {
     }
   }, [tasksData]);
 
+  // Load drag-drop-touch polyfill on client side for mobile touch support
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      import("drag-drop-touch");
+    }
+  }, []);
+
   /* ---------------- BUILD BOARD ---------------- */
   const buildBoard = (tasksData) => {
     const grouped = { PENDING: [], IN_PROGRESS: [], COMPLETED: [] };
@@ -169,12 +176,15 @@ export default function Tasks() {
             task={taskDetails} 
             onClick={setActiveTask} 
             onDelete={handleDeleteTask} 
+            onMove={(targetStatus) => {
+              updateTask({ id: taskDetails.id, status: targetStatus });
+            }}
           />
         );
       },
       isDraggable: true,
     },
-  }), [tasks]);
+  }), [tasks, updateTask]);
 
   return (
     <DashboardLayout>
@@ -185,7 +195,7 @@ export default function Tasks() {
           flexGrow: 1, 
           py: 4, 
           display: "flex", 
-          justifyContent: "center", 
+          justifyContent: "flex-start",
           overflowX: "auto",
           bgcolor: "background.default"
         }}>

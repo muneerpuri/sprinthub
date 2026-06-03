@@ -1,9 +1,9 @@
-// src/components/layout/DashboardLayout.js
 "use client";
 import React, { useState, useContext } from "react";
 import {
   Box, Drawer, AppBar, Toolbar, Typography, List, ListItem,
-  ListItemIcon, ListItemText, IconButton, Avatar, useTheme, ListItemButton
+  ListItemIcon, ListItemText, IconButton, Avatar, useTheme, ListItemButton,
+  Menu, MenuItem
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import DashboardIcon from "@mui/icons-material/Dashboard";
@@ -15,19 +15,66 @@ import LightModeIcon from "@mui/icons-material/LightMode";
 import { supabase } from "../../utils/supabase";
 import { useRouter, usePathname } from "next/navigation";
 import { ColorModeContext } from "../../app/ThemeContextProvider";
+import { useGetCurrentUserQuery, apiSlice } from "../../lib/apiSlice";
+import { useDispatch } from "react-redux";
 
 const drawerWidth = 260;
 
 export default function DashboardLayout({ children }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
   const router = useRouter();
   const pathname = usePathname();
   const theme = useTheme();
   const colorMode = useContext(ColorModeContext);
+  const dispatch = useDispatch();
+
+  // Fetch current user
+  const { data: userId } = useGetCurrentUserQuery();
+
+  // Fetch user details from Supabase
+  const [userData, setUserData] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const fetchUserDetails = async () => {
+      if (!userId) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('users')
+          .select('id, firstName, lastName, email')
+          .eq('id', userId)
+          .single();
+
+        if (!error && data) {
+          setUserData(data);
+        }
+      } catch (err) {
+        console.error('Error fetching user details:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserDetails();
+  }, [userId]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    dispatch(apiSlice.util.resetApiState());
     router.push("/auth");
+  };
+
+  const handleAvatarClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
   };
 
   const menuItems = [
@@ -36,10 +83,34 @@ export default function DashboardLayout({ children }) {
     { title: "Tasks", icon: <AssignmentIcon />, path: "/tasks" },
   ];
 
+  // Get initials for avatar
+  const getInitials = () => {
+    if (!userData) return "U";
+    const first = userData.firstName?.[0] || "";
+    const last = userData.lastName?.[0] || "";
+    return (first + last).toUpperCase();
+  };
+
   const drawerContent = (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <Toolbar sx={{ my: 1 }}>
-        <Box sx={{ width: 32, height: 32, borderRadius: 1, bgcolor: "primary.main", mr: 1.5 }} />
+        <Box
+          sx={{
+            width: 32,
+            height: 32,
+            borderRadius: 1,
+            bgcolor: "primary.main",
+            mr: 1.5,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "white",
+            fontWeight: 700,
+            fontSize: "0.875rem",
+          }}
+        >
+          SH
+        </Box>
         <Typography variant="h6" fontWeight="800" letterSpacing="-0.5px">
           SprintHub
         </Typography>
@@ -109,7 +180,39 @@ export default function DashboardLayout({ children }) {
           <IconButton onClick={colorMode.toggleColorMode} color="inherit" sx={{ mr: 2 }}>
             {theme.palette.mode === "dark" ? <LightModeIcon /> : <DarkModeIcon />}
           </IconButton>
-          <Avatar sx={{ width: 35, height: 35, bgcolor: "primary.main", fontSize: 14 }}>U</Avatar>
+
+          {/* USER AVATAR WITH MENU */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, cursor: "pointer" }} onClick={handleAvatarClick}>
+            <Avatar 
+              sx={{ 
+                width: 35, 
+                height: 35, 
+                bgcolor: "primary.main", 
+                fontSize: 14,
+                fontWeight: "bold"
+              }}
+            >
+              {getInitials()}
+            </Avatar>
+          </Box>
+
+          {/* USER MENU */}
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleMenuClose}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+          >
+            <MenuItem disabled sx={{ flexDirection: "column", alignItems: "flex-start", py: 1.5 }}>
+              <Typography variant="body2" fontWeight="600">
+                {userData ? `${userData.firstName} ${userData.lastName}` : "User"}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                {userData?.email || ""}
+              </Typography>
+            </MenuItem>
+          </Menu>
         </Toolbar>
       </AppBar>
 
