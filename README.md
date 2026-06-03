@@ -1,36 +1,82 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SprintHub 🚀
+
+SprintHub is a modern, state-of-the-art task management application designed for streamlined workflows, collaborative project tracking, and agile sprint coordination. Built using Next.js, Redux Toolkit (RTK Query), Material-UI (MUI), and Supabase.
+
+---
+
+## Key Features
+
+- **📊 Comprehensive Dashboard**: Get a high-level workload breakdown with statistics cards (total, pending, completed, high-priority tasks) and a dynamic tasks-by-priority chart.
+- **📁 Project Workspaces**: Organize initiatives in isolated projects. Manage project details, view members, edit project settings, or archive projects.
+- **👥 Collaborative Memberships**: Roles-based access control (`owner`, `editor`, `viewer`) allowing you to invite members, update roles, and manage project collaboration permissions.
+- **📋 Kanban Board**: Interact with an agile drag-and-drop board for tasks across columns (`To Do`, `In Progress`, `Done`), configure priority levels, story points, due dates, and add comments.
+- **⚡ Keyboard Navigation Shortcuts**:
+  - `Shift + D` ➜ Go to Dashboard
+  - `Shift + P` ➜ Go to Projects
+  - `Shift + T` ➜ Go to Tasks
+  - *Smart Focus Protection: Shortcuts automatically ignore triggers when typing inside inputs, textareas, selects, or content-editable elements.*
+- **🔒 Secure Authentication**: Guards protected routes using a Supabase session validation layout (`AuthGuard`) and handles sign-in, signup, and callback verifications.
+
+---
+
+## Tech Stack
+
+- **Framework**: Next.js 16 (Turbopack) & React 19
+- **State Management & Caching**: Redux Toolkit & RTK Query (decoupled modular slices mapping endpoints dynamically)
+- **UI & Styling**: Material-UI (MUI v9) & custom context theme mode provider (Light/Dark themes)
+- **Backend / DB**: Supabase (PostgreSQL, authentication, storage, database hooks)
+- **Animations**: Framer Motion
+- **Testing**: Jest & React Testing Library (RTL)
+
+---
 
 ## Getting Started
 
-First, run the development server:
+### 1. Installation
+
+Install project dependencies:
+
+```bash
+npm install
+```
+
+### 2. Environment Configuration
+
+Create a `.env.local` file in the root directory and specify your Supabase credentials:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+```
+
+### 3. Run Development Server
+
+Launch the Next.js development server locally:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser to view SprintHub.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Testing
 
-## Learn More
+SprintHub has a robust test environment. Unit and integration test suites cover page renders, redirects, state mutations, drag-and-drop events, and keyboard shortcuts.
 
-To learn more about Next.js, take a look at the following resources:
+### Run Tests
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Run the full Jest test suite:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm run test
+```
 
-## Deploy on Vercel
+### Run Tests in Watch Mode
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Keep tests running reactively in the background as you edit code:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run test:watch
+```
