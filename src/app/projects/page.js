@@ -2,8 +2,17 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Box, Typography, Button, Grid, Skeleton } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Button,
+  Grid,
+  Skeleton,
+  TextField,
+  InputAdornment
+} from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import SearchIcon from "@mui/icons-material/Search";
 import { toast } from "react-toastify";
 
 import DashboardLayout from "../../components/layout/DashboardLayout";
@@ -22,6 +31,7 @@ export default function ProjectsPage() {
   const { data: projects = [], isLoading } = useGetProjectsQuery();
   const [addProject] = useAddProjectMutation();
 
+  const [searchQuery, setSearchQuery] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -55,13 +65,23 @@ export default function ProjectsPage() {
     }
   };
 
+  // Filter projects based on the search query
+  const filteredProjects = projects.filter((project) => {
+    const searchLower = searchQuery.toLowerCase();
+    const nameMatch = project.name?.toLowerCase().includes(searchLower);
+    const descMatch = project.description?.toLowerCase().includes(searchLower);
+    return nameMatch || descMatch;
+  });
+
   return (
     <DashboardLayout>
       <Box
         sx={{
           display: "flex",
+          flexDirection: { xs: "column", md: "row" },
           justifyContent: "space-between",
-          alignItems: "center",
+          alignItems: { xs: "stretch", md: "center" },
+          gap: 2,
           mb: 4,
         }}
       >
@@ -73,14 +93,40 @@ export default function ProjectsPage() {
             Manage your workspaces and initiatives
           </Typography>
         </Box>
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<AddIcon />}
-          onClick={handleOpenNew}
+
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", sm: "row" },
+            gap: 2,
+            alignItems: "center",
+          }}
         >
-          New Project
-        </Button>
+          <TextField
+            placeholder="Search projects..."
+            variant="outlined"
+            size="small"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ width: { xs: "100%", sm: "250px", md: "300px" } }}
+          />
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+            onClick={handleOpenNew}
+            sx={{ width: { xs: "100%", sm: "auto" }, whiteSpace: "nowrap" }}
+          >
+            New Project
+          </Button>
+        </Box>
       </Box>
 
       {isLoading ? (
@@ -93,9 +139,21 @@ export default function ProjectsPage() {
         </Grid>
       ) : projects.length === 0 ? (
         <EmptyProjectState onAction={handleOpenNew} />
+      ) : filteredProjects.length === 0 ? (
+        <Box sx={{ textAlign: "center", mt: 8 }}>
+          <Typography variant="h6" color="text.secondary">
+            No projects found matching "{searchQuery}"
+          </Typography>
+          <Button
+            sx={{ mt: 2 }}
+            onClick={() => setSearchQuery("")}
+          >
+            Clear Search
+          </Button>
+        </Box>
       ) : (
         <Grid container spacing={3}>
-          {projects.map((project) => (
+          {filteredProjects.map((project) => (
             <Grid item="true" size={{ xs: 12, sm: 6, md: 4 }} key={project.id}>
               <ProjectCard
                 project={project}
