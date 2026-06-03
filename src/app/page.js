@@ -2,12 +2,10 @@
 
 import React from "react";
 import { Box, Typography, Grid, useTheme } from "@mui/material";
-import {
-  AssignmentTurnedIn as CompletedIcon,
-  HourglassEmpty as PendingIcon,
-  ListAlt as TotalTasksIcon,
-  PriorityHigh as HighPriorityIcon,
-} from "@mui/icons-material";
+import CompletedIcon from "@mui/icons-material/AssignmentTurnedIn";
+import PendingIcon from "@mui/icons-material/HourglassEmpty";
+import TotalTasksIcon from "@mui/icons-material/ListAlt";
+import HighPriorityIcon from "@mui/icons-material/PriorityHigh";
 
 import DashboardLayout from "../components/layout/DashboardLayout";
 import StatCard from "../components/dashboard/StatCard";

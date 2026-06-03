@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, Typography, Paper, Skeleton, useTheme } from "@mui/material";
-import { Flag as FlagIcon } from "@mui/icons-material";
+import FlagIcon from "@mui/icons-material/Flag";
 
 /**
  * @typedef {Object} PriorityChartProps
