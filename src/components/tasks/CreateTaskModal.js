@@ -96,34 +96,38 @@ export default function CreateTaskModal({
             required
           />
 
-          <Box display="flex" gap={2}>
-            <FormControl fullWidth>
-              <InputLabel>Project</InputLabel>
-              <Select
-                name="projectId"
-                value={form.projectId || ""}
-                label="Project"
-                onChange={handleChange}
-              >
-                <MenuItem value="">
-                  <em>None</em>
-                </MenuItem>
-                {projects.map((proj) => (
-                  <MenuItem key={proj.id} value={proj.id}>
-                    {proj.name}
+          <Box sx={{ display: "flex", gap: 2 }}>
+            <Box sx={{ flex: 1 }}>
+              <FormControl fullWidth>
+                <InputLabel>Project</InputLabel>
+                <Select
+                  name="projectId"
+                  value={form.projectId || ""}
+                  label="Project"
+                  onChange={handleChange}
+                >
+                  <MenuItem value="">
+                    <em>None</em>
                   </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+                  {projects.map((proj) => (
+                    <MenuItem key={proj.id} value={proj.id}>
+                      {proj.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
 
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DatePicker
-                label="Due Date"
-                value={form.dueDate ? dayjs(form.dueDate) : null}
-                onChange={handleDateChange}
-                slotProps={{ textField: { fullWidth: true } }}
-              />
-            </LocalizationProvider>
+            <Box sx={{ flex: 1 }}>
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DatePicker
+                  label="Due Date"
+                  value={form.dueDate ? dayjs(form.dueDate) : null}
+                  onChange={handleDateChange}
+                  slotProps={{ textField: { fullWidth: true } }}
+                />
+              </LocalizationProvider>
+            </Box>
           </Box>
 
           <TextField
@@ -137,37 +141,41 @@ export default function CreateTaskModal({
           />
 
           <Box sx={{ display: "flex", gap: 2 }}>
-            <FormControl fullWidth>
-              <InputLabel>Priority</InputLabel>
-              <Select
-                name="priority"
-                value={form.priority || "medium"}
-                label="Priority"
-                onChange={handleChange}
-              >
-                <MenuItem value="high">High</MenuItem>
-                <MenuItem value="medium">Medium</MenuItem>
-                <MenuItem value="low">Low</MenuItem>
-              </Select>
-            </FormControl>
+            <Box sx={{ flex: 1 }}>
+              <FormControl fullWidth>
+                <InputLabel>Priority</InputLabel>
+                <Select
+                  name="priority"
+                  value={form.priority || "medium"}
+                  label="Priority"
+                  onChange={handleChange}
+                >
+                  <MenuItem value="high">High</MenuItem>
+                  <MenuItem value="medium">Medium</MenuItem>
+                  <MenuItem value="low">Low</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
 
-            <FormControl fullWidth>
-              <InputLabel>Story Points</InputLabel>
-              <Select
-                name="storyPoints"
-                value={form.storyPoints || ""}
-                label="Story Points"
-                onChange={handleChange}
-              >
-                <MenuItem value="">
-                  <em>None</em>
-                </MenuItem>
-                <MenuItem value={1}>1</MenuItem>
-                <MenuItem value={2}>2</MenuItem>
-                <MenuItem value={4}>4</MenuItem>
-                <MenuItem value={8}>8</MenuItem>
-              </Select>
-            </FormControl>
+            <Box sx={{ flex: 1 }}>
+              <FormControl fullWidth>
+                <InputLabel>Story Points</InputLabel>
+                <Select
+                  name="storyPoints"
+                  value={form.storyPoints || ""}
+                  label="Story Points"
+                  onChange={handleChange}
+                >
+                  <MenuItem value="">
+                    <em>None</em>
+                  </MenuItem>
+                  <MenuItem value={1}>1</MenuItem>
+                  <MenuItem value={2}>2</MenuItem>
+                  <MenuItem value={4}>4</MenuItem>
+                  <MenuItem value={8}>8</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
           </Box>
 
           <FormControl fullWidth>

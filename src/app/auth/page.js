@@ -62,7 +62,7 @@ export default function AuthPage() {
           },
         });
         if (error) throw error;
-        toast.success("Account created! You can now log in.");
+        toast.success("Account created! Please verify your email address.");
         setIsLogin(true);
       }
     } catch (error) {

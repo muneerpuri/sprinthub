@@ -23,11 +23,12 @@ export default function TaskHeader({ onCreateClick }) {
         justifyContent: "space-between",
         px: { xs: 3, md: 6 },
         py: 3,
-        borderBottom: "1px solid #e2e8f0",
-        bgcolor: "#ffffff",
+        borderBottom: "1px solid",
+        borderColor: "divider",
+        bgcolor: "background.paper",
       }}
     >
-      <Typography variant="h5" fontWeight="bold" color="#0f172a">
+      <Typography variant="h5" fontWeight="bold">
         Kanban Board
       </Typography>
       <Button

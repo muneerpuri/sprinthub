@@ -126,33 +126,37 @@ export default function TaskDetailModal({
               gap: 2,
             }}
           >
-            <FormControl fullWidth>
-              <InputLabel>Project</InputLabel>
-              <Select
-                name="projectId"
-                value={activeTask.projectId || ""}
-                label="Project"
-                onChange={handleChange}
-              >
-                <MenuItem value="">
-                  <em>None</em>
-                </MenuItem>
-                {projects.map((proj) => (
-                  <MenuItem key={proj.id} value={proj.id}>
-                    {proj.name}
+            <Box sx={{ flex: 1 }}>
+              <FormControl fullWidth>
+                <InputLabel>Project</InputLabel>
+                <Select
+                  name="projectId"
+                  value={activeTask.projectId || ""}
+                  label="Project"
+                  onChange={handleChange}
+                >
+                  <MenuItem value="">
+                    <em>None</em>
                   </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+                  {projects.map((proj) => (
+                    <MenuItem key={proj.id} value={proj.id}>
+                      {proj.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
 
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DatePicker
-                label="Due Date"
-                value={activeTask.dueDate ? dayjs(activeTask.dueDate) : null}
-                onChange={handleDateChange}
-                slotProps={{ textField: { fullWidth: true } }}
-              />
-            </LocalizationProvider>
+            <Box sx={{ flex: 1 }}>
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DatePicker
+                  label="Due Date"
+                  value={activeTask.dueDate ? dayjs(activeTask.dueDate) : null}
+                  onChange={handleDateChange}
+                  slotProps={{ textField: { fullWidth: true } }}
+                />
+              </LocalizationProvider>
+            </Box>
           </Box>
 
           <TextField
@@ -172,32 +176,36 @@ export default function TaskDetailModal({
               gap: 2,
             }}
           >
-            <FormControl fullWidth>
-              <InputLabel>Status</InputLabel>
-              <Select
-                name="status"
-                value={activeTask.status || "PENDING"}
-                label="Status"
-                onChange={handleChange}
-              >
-                <MenuItem value="PENDING">To Do</MenuItem>
-                <MenuItem value="IN_PROGRESS">In Progress</MenuItem>
-                <MenuItem value="COMPLETED">Done</MenuItem>
-              </Select>
-            </FormControl>
-            <FormControl fullWidth>
-              <InputLabel>Priority</InputLabel>
-              <Select
-                name="priority"
-                value={activeTask.priority || "medium"}
-                label="Priority"
-                onChange={handleChange}
-              >
-                <MenuItem value="high">High</MenuItem>
-                <MenuItem value="medium">Medium</MenuItem>
-                <MenuItem value="low">Low</MenuItem>
-              </Select>
-            </FormControl>
+            <Box sx={{ flex: 1 }}>
+              <FormControl fullWidth>
+                <InputLabel>Status</InputLabel>
+                <Select
+                  name="status"
+                  value={activeTask.status || "PENDING"}
+                  label="Status"
+                  onChange={handleChange}
+                >
+                  <MenuItem value="PENDING">To Do</MenuItem>
+                  <MenuItem value="IN_PROGRESS">In Progress</MenuItem>
+                  <MenuItem value="COMPLETED">Done</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+            <Box sx={{ flex: 1 }}>
+              <FormControl fullWidth>
+                <InputLabel>Priority</InputLabel>
+                <Select
+                  name="priority"
+                  value={activeTask.priority || "medium"}
+                  label="Priority"
+                  onChange={handleChange}
+                >
+                  <MenuItem value="high">High</MenuItem>
+                  <MenuItem value="medium">Medium</MenuItem>
+                  <MenuItem value="low">Low</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
           </Box>
 
           <Box
@@ -207,47 +215,51 @@ export default function TaskDetailModal({
               gap: 2,
             }}
           >
-            <FormControl fullWidth>
-              <InputLabel>Story Points</InputLabel>
-              <Select
-                name="storyPoints"
-                value={activeTask.storyPoints || ""}
-                label="Story Points"
-                onChange={handleChange}
-              >
-                <MenuItem value="">
-                  <em>None</em>
-                </MenuItem>
-                <MenuItem value={1}>1</MenuItem>
-                <MenuItem value={2}>2</MenuItem>
-                <MenuItem value={4}>4</MenuItem>
-                <MenuItem value={8}>8</MenuItem>
-              </Select>
-            </FormControl>
-
-            <FormControl fullWidth>
-              <InputLabel>Labels</InputLabel>
-              <Select
-                multiple
-                name="labels"
-                value={activeTask.labels || []}
-                onChange={handleChange}
-                input={<OutlinedInput label="Labels" />}
-                renderValue={(selected) => (
-                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                    {selected.map((value) => (
-                      <Chip key={value} label={value} size="small" />
-                    ))}
-                  </Box>
-                )}
-              >
-                {AVAILABLE_LABELS.map((name) => (
-                  <MenuItem key={name} value={name}>
-                    {name}
+            <Box sx={{ flex: 1 }}>
+              <FormControl fullWidth>
+                <InputLabel>Story Points</InputLabel>
+                <Select
+                  name="storyPoints"
+                  value={activeTask.storyPoints || ""}
+                  label="Story Points"
+                  onChange={handleChange}
+                >
+                  <MenuItem value="">
+                    <em>None</em>
                   </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+                  <MenuItem value={1}>1</MenuItem>
+                  <MenuItem value={2}>2</MenuItem>
+                  <MenuItem value={4}>4</MenuItem>
+                  <MenuItem value={8}>8</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+
+            <Box sx={{ flex: 1 }}>
+              <FormControl fullWidth>
+                <InputLabel>Labels</InputLabel>
+                <Select
+                  multiple
+                  name="labels"
+                  value={activeTask.labels || []}
+                  onChange={handleChange}
+                  input={<OutlinedInput label="Labels" />}
+                  renderValue={(selected) => (
+                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                      {selected.map((value) => (
+                        <Chip key={value} label={value} size="small" />
+                      ))}
+                    </Box>
+                  )}
+                >
+                  {AVAILABLE_LABELS.map((name) => (
+                    <MenuItem key={name} value={name}>
+                      {name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
           </Box>
         </Box>
 
