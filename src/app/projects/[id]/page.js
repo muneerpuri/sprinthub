@@ -121,7 +121,7 @@ export default function ProjectDetailsPage() {
 
   const handleRoleChange = async (memberId, newRole) => {
     try {
-      await updateRole({ memberId, role: newRole }).unwrap();
+      await updateRole({ memberId, role: newRole, projectId }).unwrap();
       toast.success("Role updated");
     } catch (err) {
       toast.error("Failed to update role");
@@ -131,7 +131,7 @@ export default function ProjectDetailsPage() {
   const handleRemoveMember = async (memberId) => {
     if (!window.confirm("Remove this user from the project?")) return;
     try {
-      await removeMember(memberId).unwrap();
+      await removeMember({ memberId, projectId }).unwrap();
       toast.success("User removed");
     } catch (err) {
       toast.error("Failed to remove user");

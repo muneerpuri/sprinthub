@@ -68,7 +68,12 @@ export default function ProjectMembersTab({
           <Box
             component="form"
             onSubmit={handleInviteSubmit}
-            sx={{ display: "flex", gap: 2, alignItems: "center" }}
+            sx={{
+              display: "flex",
+              flexDirection: { xs: "column", sm: "row" },
+              gap: 2,
+              alignItems: { xs: "stretch", sm: "center" },
+            }}
           >
             <TextField
               size="small"
@@ -83,7 +88,7 @@ export default function ProjectMembersTab({
               size="small"
               value={inviteRole}
               onChange={(e) => setInviteRole(e.target.value)}
-              sx={{ minWidth: 150 }}
+              sx={{ minWidth: 150, width: { xs: "100%", sm: "auto" } }}
             >
               <MenuItem value="viewer">Viewer</MenuItem>
               <MenuItem value="editor">Editor</MenuItem>
@@ -94,7 +99,7 @@ export default function ProjectMembersTab({
               variant="contained"
               startIcon={<PersonAddIcon />}
               disabled={isInviting}
-              sx={{ minWidth: 120 }}
+              sx={{ minWidth: 120, width: { xs: "100%", sm: "auto" } }}
             >
               {isInviting ? "Inviting..." : "Invite"}
             </Button>
@@ -137,9 +142,9 @@ export default function ProjectMembersTab({
                   <TableCell>{member.users?.email}</TableCell>
                   {member?.userId === ownerId ? (
                     <TableCell>OWNER</TableCell>
-                  ) : (!canManage? <TableCell>
-                    {member?.role?.toUpperCase() || "NA"}
-                  </TableCell> :
+                  ) : !canManage ? (
+                    <TableCell>{member?.role?.toUpperCase() || "NA"}</TableCell>
+                  ) : (
                     <TableCell>
                       {canManage ? (
                         <Select
