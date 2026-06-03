@@ -7,16 +7,38 @@ import { supabase } from "../../utils/supabase";
 export const projectsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getProjects: builder.query({
-      queryFn: async () => {
-        const { data, error } = await supabase
-          .from("projects")
-          .select("*, owner:ownerId(firstName, lastName, email)")
-          .order("createdAt", { ascending: false });
-        if (error) return { error };
-        return { data };
+      queryFn: async ({ page = 1, limit = 9, search = "" } = {}) => {
+        try {
+          const from = (page - 1) * limit;
+          const to = from + limit - 1;
+
+          let query = supabase
+            .from("projects")
+            .select("*, owner:ownerId(firstName, lastName, email)", { count: "exact" })
+            .order("createdAt", { ascending: false })
+            .range(from, to);
+
+          if (search) {
+            query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
+          }
+
+          const { data, count, error } = await query;
+          if (error) throw error;
+
+          return {
+            data: {
+              projects: data,
+              totalCount: count || 0,
+              totalPages: count ? Math.ceil(count / limit) : 0
+            }
+          };
+        } catch (error) {
+          return { error };
+        }
       },
       providesTags: ["Project"],
     }),
+
     getProjectById: builder.query({
       queryFn: async (id) => {
         const { data, error } = await supabase
