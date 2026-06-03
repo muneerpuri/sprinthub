@@ -151,7 +151,7 @@ describe("AuthPage", () => {
         },
       });
       expect(toast.success).toHaveBeenCalledWith(
-        "Account created! You can now log in.",
+        "Account created! Please verify your email address.",
       );
     });
   });
