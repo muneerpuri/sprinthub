@@ -65,7 +65,11 @@ export default function ProjectMembersTab({
           <Typography variant="h6" mb={2}>
             Invite User to Project
           </Typography>
-          <Box component="form" onSubmit={handleInviteSubmit} sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+          <Box
+            component="form"
+            onSubmit={handleInviteSubmit}
+            sx={{ display: "flex", gap: 2, alignItems: "center" }}
+          >
             <TextField
               size="small"
               label="User Email"
@@ -75,12 +79,23 @@ export default function ProjectMembersTab({
               required
               fullWidth
             />
-            <Select size="small" value={inviteRole} onChange={(e) => setInviteRole(e.target.value)} sx={{ minWidth: 150 }}>
+            <Select
+              size="small"
+              value={inviteRole}
+              onChange={(e) => setInviteRole(e.target.value)}
+              sx={{ minWidth: 150 }}
+            >
               <MenuItem value="viewer">Viewer</MenuItem>
               <MenuItem value="editor">Editor</MenuItem>
               <MenuItem value="owner">Owner</MenuItem>
             </Select>
-            <Button type="submit" variant="contained" startIcon={<PersonAddIcon />} disabled={isInviting} sx={{ minWidth: 120 }}>
+            <Button
+              type="submit"
+              variant="contained"
+              startIcon={<PersonAddIcon />}
+              disabled={isInviting}
+              sx={{ minWidth: 120 }}
+            >
               {isInviting ? "Inviting..." : "Invite"}
             </Button>
           </Box>
@@ -125,19 +140,32 @@ export default function ProjectMembersTab({
                   ) : (
                     <TableCell>
                       {canManage ? (
-                        <Select size="small" value={member.role} onChange={(e) => onRoleChange(member.id, e.target.value)} sx={{ minWidth: 120 }}>
+                        <Select
+                          size="small"
+                          value={member.role}
+                          onChange={(e) =>
+                            onRoleChange(member.id, e.target.value)
+                          }
+                          sx={{ minWidth: 120 }}
+                        >
                           <MenuItem value="viewer">Viewer</MenuItem>
                           <MenuItem value="editor">Editor</MenuItem>
                           <MenuItem value="owner">Owner</MenuItem>
                         </Select>
                       ) : (
-                        <Typography sx={{ textTransform: "capitalize" }}>{member.role}</Typography>
+                        <Typography sx={{ textTransform: "capitalize" }}>
+                          {member.role}
+                        </Typography>
                       )}
                     </TableCell>
                   )}
                   {canManage && (
                     <TableCell align="right">
-                      <IconButton color="error" disabled={member?.userId === ownerId} onClick={() => onRemove(member.id)}>
+                      <IconButton
+                        color="error"
+                        disabled={member?.userId === ownerId}
+                        onClick={() => onRemove(member.id)}
+                      >
                         <DeleteIcon />
                       </IconButton>
                     </TableCell>

@@ -42,7 +42,9 @@ export const projectsApi = baseApi.injectEndpoints({
           const newProject = data[0];
           const { error: memberError } = await supabase
             .from("project_members")
-            .insert([{ projectId: newProject.id, userId: ownerId, role: "owner" }]);
+            .insert([
+              { projectId: newProject.id, userId: ownerId, role: "owner" },
+            ]);
           if (memberError) {
             console.error("Failed to add owner member record:", memberError);
           }

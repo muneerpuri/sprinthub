@@ -72,7 +72,6 @@ export default function AuthPage() {
 
   return (
     <Grid container sx={{ height: "100vh" }}>
-      {/* Left Branding Side - Hidden on Mobile */}
       <Grid
         item="true"
         size={{ xs: 12, md: 6 }}
@@ -102,7 +101,6 @@ export default function AuthPage() {
         </motion.div>
       </Grid>
 
-      {/* Right Form Side */}
       <Grid
         item="true"
         size={{ xs: 12, md: 6 }}

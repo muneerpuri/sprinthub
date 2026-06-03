@@ -48,14 +48,16 @@ export default function KanbanBoard({
               task={taskDetails}
               onClick={onTaskClick}
               onDelete={onTaskDelete}
-              onMove={(targetStatus) => onTaskStatusChange(taskDetails.id, targetStatus)}
+              onMove={(targetStatus) =>
+                onTaskStatusChange(taskDetails.id, targetStatus)
+              }
             />
           );
         },
         isDraggable: true,
       },
     }),
-    [tasks, onTaskClick, onTaskDelete, onTaskStatusChange]
+    [tasks, onTaskClick, onTaskDelete, onTaskStatusChange],
   );
 
   if (isLoading || !board) {

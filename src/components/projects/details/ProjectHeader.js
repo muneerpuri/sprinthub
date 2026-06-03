@@ -19,7 +19,13 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
  * @param {ProjectHeaderProps} props - The component props.
  * @returns {JSX.Element}
  */
-export default function ProjectHeader({ project, canEdit, canDelete, onEdit, onDelete }) {
+export default function ProjectHeader({
+  project,
+  canEdit,
+  canDelete,
+  onEdit,
+  onDelete,
+}) {
   const ownerName = project?.owner
     ? `${project.owner.firstName || ""} ${project.owner.lastName || ""}`.trim()
     : "No Owner";
@@ -60,19 +66,31 @@ export default function ProjectHeader({ project, canEdit, canDelete, onEdit, onD
               size="small"
             />
             <Typography variant="caption" color="text.disabled">
-              Created: {project?.createdAt ? new Date(project.createdAt).toLocaleDateString() : ""}
+              Created:{" "}
+              {project?.createdAt
+                ? new Date(project.createdAt).toLocaleDateString()
+                : ""}
             </Typography>
           </Box>
         </Box>
 
         <Box sx={{ display: "flex", gap: 1 }}>
           {canEdit && (
-            <Button variant="outlined" startIcon={<EditIcon />} onClick={onEdit}>
+            <Button
+              variant="outlined"
+              startIcon={<EditIcon />}
+              onClick={onEdit}
+            >
               Edit
             </Button>
           )}
           {canDelete && (
-            <Button variant="outlined" color="error" startIcon={<DeleteIcon />} onClick={onDelete}>
+            <Button
+              variant="outlined"
+              color="error"
+              startIcon={<DeleteIcon />}
+              onClick={onDelete}
+            >
               Delete
             </Button>
           )}
@@ -81,10 +99,18 @@ export default function ProjectHeader({ project, canEdit, canDelete, onEdit, onD
 
       <Grid container spacing={3}>
         <Grid item="true" size={{ xs: 12, md: 7 }}>
-          <Typography variant="subtitle2" color="text.secondary" gutterBottom fontWeight="bold">
+          <Typography
+            variant="subtitle2"
+            color="text.secondary"
+            gutterBottom
+            fontWeight="bold"
+          >
             Project Description
           </Typography>
-          <Typography variant="body2" sx={{ whiteSpace: "pre-line", color: "text.primary" }}>
+          <Typography
+            variant="body2"
+            sx={{ whiteSpace: "pre-line", color: "text.primary" }}
+          >
             {project?.description || "No description provided."}
           </Typography>
         </Grid>
@@ -99,10 +125,17 @@ export default function ProjectHeader({ project, canEdit, canDelete, onEdit, onD
               borderColor: "divider",
             }}
           >
-            <Typography variant="subtitle2" color="text.secondary" gutterBottom fontWeight="bold">
+            <Typography
+              variant="subtitle2"
+              color="text.secondary"
+              gutterBottom
+              fontWeight="bold"
+            >
               Project Owner
             </Typography>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mt: 1 }}>
+            <Box
+              sx={{ display: "flex", alignItems: "center", gap: 1.5, mt: 1 }}
+            >
               <Avatar
                 sx={{
                   bgcolor: project?.color || "primary.main",

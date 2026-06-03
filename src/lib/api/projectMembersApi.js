@@ -15,7 +15,9 @@ export const projectMembersApi = baseApi.injectEndpoints({
         if (error) return { error };
         return { data };
       },
-      providesTags: (result, error, projectId) => [{ type: "ProjectMember", id: projectId }],
+      providesTags: (result, error, projectId) => [
+        { type: "ProjectMember", id: projectId },
+      ],
     }),
     inviteUserToProject: builder.mutation({
       queryFn: async ({ projectId, email, role }) => {
@@ -26,7 +28,9 @@ export const projectMembersApi = baseApi.injectEndpoints({
           .single();
 
         if (userError || !user) {
-          return { error: { message: "User not found. They must sign up first." } };
+          return {
+            error: { message: "User not found. They must sign up first." },
+          };
         }
 
         const { data, error } = await supabase
@@ -36,13 +40,17 @@ export const projectMembersApi = baseApi.injectEndpoints({
 
         if (error) {
           if (error.code === "23505") {
-            return { error: { message: "User is already a member of this project." } };
+            return {
+              error: { message: "User is already a member of this project." },
+            };
           }
           return { error };
         }
         return { data };
       },
-      invalidatesTags: (result, error, { projectId }) => [{ type: "ProjectMember", id: projectId }],
+      invalidatesTags: (result, error, { projectId }) => [
+        { type: "ProjectMember", id: projectId },
+      ],
     }),
     updateMemberRole: builder.mutation({
       queryFn: async ({ memberId, role, projectId }) => {
@@ -54,7 +62,9 @@ export const projectMembersApi = baseApi.injectEndpoints({
         if (error) return { error };
         return { data };
       },
-      invalidatesTags: (result, error, { projectId }) => [{ type: "ProjectMember", id: projectId }],
+      invalidatesTags: (result, error, { projectId }) => [
+        { type: "ProjectMember", id: projectId },
+      ],
     }),
     removeMember: builder.mutation({
       queryFn: async ({ memberId, projectId }) => {
@@ -65,7 +75,9 @@ export const projectMembersApi = baseApi.injectEndpoints({
         if (error) return { error };
         return { data: memberId };
       },
-      invalidatesTags: (result, error, { projectId }) => [{ type: "ProjectMember", id: projectId }],
+      invalidatesTags: (result, error, { projectId }) => [
+        { type: "ProjectMember", id: projectId },
+      ],
     }),
   }),
 });

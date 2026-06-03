@@ -26,11 +26,13 @@ export default function DashboardPage() {
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter((t) => t.status === "COMPLETED").length;
   const pendingTasks = tasks.filter(
-    (t) => t.status === "PENDING" || t.status === "IN_PROGRESS"
+    (t) => t.status === "PENDING" || t.status === "IN_PROGRESS",
   ).length;
 
   const highPriorityCount = tasks.filter((t) => t.priority === "high").length;
-  const mediumPriorityCount = tasks.filter((t) => t.priority === "medium").length;
+  const mediumPriorityCount = tasks.filter(
+    (t) => t.priority === "medium",
+  ).length;
   const lowPriorityCount = tasks.filter((t) => t.priority === "low").length;
 
   const statCards = [

@@ -57,11 +57,21 @@ export default function ProjectCard({ project, onClick }) {
             mb: 1,
           }}
         >
-          <Typography variant="h6" fontWeight="bold" noWrap title={project.name}>
+          <Typography
+            variant="h6"
+            fontWeight="bold"
+            noWrap
+            title={project.name}
+          >
             {project.name}
           </Typography>
           {project.isArchived && (
-            <Chip label="Archived" size="small" color="default" variant="outlined" />
+            <Chip
+              label="Archived"
+              size="small"
+              color="default"
+              variant="outlined"
+            />
           )}
         </Box>
         <Typography

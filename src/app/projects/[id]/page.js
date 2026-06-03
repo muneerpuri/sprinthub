@@ -2,7 +2,14 @@
 
 import React, { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Box, Typography, Button, Tabs, Tab, CircularProgress } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Button,
+  Tabs,
+  Tab,
+  CircularProgress,
+} from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { toast } from "react-toastify";
 
@@ -43,11 +50,14 @@ export default function ProjectDetailsPage() {
   });
 
   const { data: currentUser } = useGetCurrentUserQuery();
-  const { data: project, isLoading: isProjectLoading } = useGetProjectByIdQuery(projectId);
-  const { data: members = [], isLoading: isMembersLoading } = useGetProjectMembersQuery(projectId);
+  const { data: project, isLoading: isProjectLoading } =
+    useGetProjectByIdQuery(projectId);
+  const { data: members = [], isLoading: isMembersLoading } =
+    useGetProjectMembersQuery(projectId);
   const { data: allTasks = [], isLoading: tasksLoading } = useGetTasksQuery();
 
-  const [inviteUser, { isLoading: isInviting }] = useInviteUserToProjectMutation();
+  const [inviteUser, { isLoading: isInviting }] =
+    useInviteUserToProjectMutation();
   const [updateRole] = useUpdateMemberRoleMutation();
   const [removeMember] = useRemoveMemberMutation();
   const [updateProject] = useUpdateProjectMutation();
@@ -85,7 +95,11 @@ export default function ProjectDetailsPage() {
   };
 
   const handleDeleteProject = async () => {
-    if (window.confirm("Are you sure you want to delete this project entirely? This cannot be undone.")) {
+    if (
+      window.confirm(
+        "Are you sure you want to delete this project entirely? This cannot be undone.",
+      )
+    ) {
       try {
         await deleteProject(projectId).unwrap();
         toast.success("Project deleted");
@@ -127,7 +141,14 @@ export default function ProjectDetailsPage() {
   if (isProjectLoading) {
     return (
       <DashboardLayout>
-        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "50vh" }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "50vh",
+          }}
+        >
           <CircularProgress />
         </Box>
       </DashboardLayout>
@@ -144,7 +165,11 @@ export default function ProjectDetailsPage() {
 
   return (
     <DashboardLayout>
-      <Button startIcon={<ArrowBackIcon />} onClick={() => router.push("/projects")} sx={{ mb: 2 }}>
+      <Button
+        startIcon={<ArrowBackIcon />}
+        onClick={() => router.push("/projects")}
+        sx={{ mb: 2 }}
+      >
         Back to Projects
       </Button>
 

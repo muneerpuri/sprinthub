@@ -16,7 +16,9 @@ export const commentsApi = baseApi.injectEndpoints({
         if (error) return { error };
         return { data };
       },
-      providesTags: (result, error, taskId) => [{ type: "Comment", id: taskId }],
+      providesTags: (result, error, taskId) => [
+        { type: "Comment", id: taskId },
+      ],
     }),
     addComment: builder.mutation({
       queryFn: async (payload) => {
@@ -28,7 +30,9 @@ export const commentsApi = baseApi.injectEndpoints({
         if (error) return { error };
         return { data };
       },
-      invalidatesTags: (result, error, { taskId }) => [{ type: "Comment", id: taskId }],
+      invalidatesTags: (result, error, { taskId }) => [
+        { type: "Comment", id: taskId },
+      ],
     }),
   }),
 });

@@ -66,8 +66,8 @@ export const buildKanbanBoard = (tasksData) => {
         status === "IN_PROGRESS"
           ? "progress"
           : status === "COMPLETED"
-          ? "done"
-          : "todo",
+            ? "done"
+            : "todo",
       task: t,
     };
   });

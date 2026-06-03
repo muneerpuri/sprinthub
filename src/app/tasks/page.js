@@ -16,7 +16,10 @@ import CreateTaskModal from "../../components/tasks/CreateTaskModal";
 import TaskDetailModal from "../../components/tasks/TaskDetailModal";
 import KanbanBoard from "../../components/tasks/KanbanBoard";
 import DashboardLayout from "../../components/layout/DashboardLayout";
-import { buildKanbanBoard, COLUMN_STATUS_MAP } from "../../components/tasks/kanbanUtils";
+import {
+  buildKanbanBoard,
+  COLUMN_STATUS_MAP,
+} from "../../components/tasks/kanbanUtils";
 
 const EMPTY_ARRAY = [];
 
@@ -106,7 +109,7 @@ export default function TasksPage() {
   const handleCardMove = async (move) => {
     const newStatus = COLUMN_STATUS_MAP[move.toColumnId];
     const updatedBoard = dropHandler(move, board);
-    
+
     if (updatedBoard[move.cardId]) {
       updatedBoard[move.cardId].parentId = move.toColumnId;
     }
@@ -167,7 +170,7 @@ export default function TasksPage() {
           setForm={setForm}
           onCreate={handleCreate}
         />
-        
+
         <TaskDetailModal
           activeTask={activeTask}
           setActiveTask={setActiveTask}

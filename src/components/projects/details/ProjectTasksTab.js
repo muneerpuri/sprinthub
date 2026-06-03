@@ -1,5 +1,13 @@
 import React from "react";
-import { Box, Typography, CircularProgress, LinearProgress, Card, CardContent, Chip } from "@mui/material";
+import {
+  Box,
+  Typography,
+  CircularProgress,
+  LinearProgress,
+  Card,
+  CardContent,
+  Chip,
+} from "@mui/material";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 
@@ -17,9 +25,12 @@ import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
  * @returns {JSX.Element}
  */
 export default function ProjectTasksTab({ tasks, isLoading, projectColor }) {
-  const completedTasks = tasks.filter((t) => (t.status || "").toUpperCase() === "COMPLETED").length;
+  const completedTasks = tasks.filter(
+    (t) => (t.status || "").toUpperCase() === "COMPLETED",
+  ).length;
   const totalTasks = tasks.length;
-  const completionPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+  const completionPercentage =
+    totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
   const getPriorityColor = (priority) => {
     switch (priority) {
@@ -36,7 +47,14 @@ export default function ProjectTasksTab({ tasks, isLoading, projectColor }) {
 
   return (
     <Box>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 1.5,
+        }}
+      >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <AssignmentIcon color="action" />
           <Typography variant="subtitle1" fontWeight="bold">
@@ -44,7 +62,11 @@ export default function ProjectTasksTab({ tasks, isLoading, projectColor }) {
           </Typography>
         </Box>
         {totalTasks > 0 && (
-          <Typography variant="body2" color="text.secondary" fontWeight="medium">
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            fontWeight="medium"
+          >
             {completedTasks}/{totalTasks} Completed ({completionPercentage}%)
           </Typography>
         )}
@@ -89,11 +111,24 @@ export default function ProjectTasksTab({ tasks, isLoading, projectColor }) {
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
           {tasks.map((task) => {
             const formattedDate = task.dueDate
-              ? new Date(task.dueDate).toLocaleDateString(undefined, { month: "short", day: "numeric" })
+              ? new Date(task.dueDate).toLocaleDateString(undefined, {
+                  month: "short",
+                  day: "numeric",
+                })
               : null;
             const statusUpper = (task.status || "PENDING").toUpperCase();
-            const statusColor = statusUpper === "COMPLETED" ? "success" : statusUpper === "IN_PROGRESS" ? "info" : "default";
-            const statusText = statusUpper === "COMPLETED" ? "Done" : statusUpper === "IN_PROGRESS" ? "In Progress" : "To Do";
+            const statusColor =
+              statusUpper === "COMPLETED"
+                ? "success"
+                : statusUpper === "IN_PROGRESS"
+                  ? "info"
+                  : "default";
+            const statusText =
+              statusUpper === "COMPLETED"
+                ? "Done"
+                : statusUpper === "IN_PROGRESS"
+                  ? "In Progress"
+                  : "To Do";
 
             return (
               <Card
@@ -118,30 +153,84 @@ export default function ProjectTasksTab({ tasks, isLoading, projectColor }) {
                   }}
                 >
                   <Box sx={{ minWidth: 200, flex: 1 }}>
-                    <Typography variant="body2" fontWeight="bold" sx={{ lineBreak: "anywhere" }}>
+                    <Typography
+                      variant="body2"
+                      fontWeight="bold"
+                      sx={{ lineBreak: "anywhere" }}
+                    >
                       {task.title}
                     </Typography>
                     {task.description && (
-                      <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5, lineBreak: "anywhere" }}>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{
+                          display: "block",
+                          mt: 0.5,
+                          lineBreak: "anywhere",
+                        }}
+                      >
                         {task.description}
                       </Typography>
                     )}
                   </Box>
 
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap" }}>
-                    <Chip label={statusText} size="small" color={statusColor} variant="outlined" sx={{ height: 22, fontSize: "0.7rem", fontWeight: "medium" }} />
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1.5,
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    <Chip
+                      label={statusText}
+                      size="small"
+                      color={statusColor}
+                      variant="outlined"
+                      sx={{
+                        height: 22,
+                        fontSize: "0.7rem",
+                        fontWeight: "medium",
+                      }}
+                    />
                     {task.priority && (
-                      <Chip label={task.priority} size="small" color={getPriorityColor(task.priority)} sx={{ height: 22, fontSize: "0.7rem", fontWeight: "bold", textTransform: "uppercase" }} />
+                      <Chip
+                        label={task.priority}
+                        size="small"
+                        color={getPriorityColor(task.priority)}
+                        sx={{
+                          height: 22,
+                          fontSize: "0.7rem",
+                          fontWeight: "bold",
+                          textTransform: "uppercase",
+                        }}
+                      />
                     )}
                     {task.storyPoints && (
-                      <Typography variant="caption" fontWeight="bold" color="text.secondary" sx={{ fontSize: "0.75rem" }}>
+                      <Typography
+                        variant="caption"
+                        fontWeight="bold"
+                        color="text.secondary"
+                        sx={{ fontSize: "0.75rem" }}
+                      >
                         {task.storyPoints} pt
                       </Typography>
                     )}
                     {formattedDate && (
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "text.secondary" }}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 0.5,
+                          color: "text.secondary",
+                        }}
+                      >
                         <CalendarTodayIcon sx={{ fontSize: 12 }} />
-                        <Typography variant="caption" sx={{ fontSize: "0.75rem" }}>
+                        <Typography
+                          variant="caption"
+                          sx={{ fontSize: "0.75rem" }}
+                        >
                           {formattedDate}
                         </Typography>
                       </Box>

@@ -30,7 +30,4 @@ export {
   useUpdateMemberRoleMutation,
   useRemoveMemberMutation,
 } from "./api/projectMembersApi";
-export {
-  useGetCommentsQuery,
-  useAddCommentMutation,
-} from "./api/commentsApi";
+export { useGetCommentsQuery, useAddCommentMutation } from "./api/commentsApi";
