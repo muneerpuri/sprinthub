@@ -14,6 +14,8 @@ import {
   Box,
   OutlinedInput,
   Chip,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -63,6 +65,8 @@ export default function CreateTaskModal({
   onCreate,
 }) {
   const { data: projects = [] } = useGetProjectsQuery();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const handleChange = (e) => {
     const value =
@@ -83,7 +87,7 @@ export default function CreateTaskModal({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" fullScreen={isMobile}>
       <DialogTitle fontWeight="bold">Create New Task</DialogTitle>
       <DialogContent dividers>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, pt: 1 }}>
@@ -96,8 +100,8 @@ export default function CreateTaskModal({
             required
           />
 
-          <Box sx={{ display: "flex", gap: 2 }}>
-            <Box sx={{ flex: 1 }}>
+          <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 2 }}>
+            <Box sx={{ flex: 1, minWidth: 0, width: "100%" }}>
               <FormControl fullWidth>
                 <InputLabel>Project</InputLabel>
                 <Select
@@ -118,7 +122,7 @@ export default function CreateTaskModal({
               </FormControl>
             </Box>
 
-            <Box sx={{ flex: 1 }}>
+            <Box sx={{ flex: 1, minWidth: 0, width: "100%" }}>
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
                   label="Due Date"
@@ -140,8 +144,8 @@ export default function CreateTaskModal({
             rows={3}
           />
 
-          <Box sx={{ display: "flex", gap: 2 }}>
-            <Box sx={{ flex: 1 }}>
+          <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 2 }}>
+            <Box sx={{ flex: 1, minWidth: 0, width: "100%" }}>
               <FormControl fullWidth>
                 <InputLabel>Priority</InputLabel>
                 <Select
@@ -157,7 +161,7 @@ export default function CreateTaskModal({
               </FormControl>
             </Box>
 
-            <Box sx={{ flex: 1 }}>
+            <Box sx={{ flex: 1, minWidth: 0, width: "100%" }}>
               <FormControl fullWidth>
                 <InputLabel>Story Points</InputLabel>
                 <Select
