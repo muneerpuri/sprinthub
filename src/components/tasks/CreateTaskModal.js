@@ -16,12 +16,13 @@ import {
   Chip,
   useMediaQuery,
   useTheme,
+  Autocomplete,
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
-import { useGetProjectsQuery } from "../../lib/apiSlice";
+import { useGetProjectsListQuery } from "../../lib/apiSlice";
 
 const AVAILABLE_LABELS = [
   "Bug",
@@ -64,7 +65,7 @@ export default function CreateTaskModal({
   setForm,
   onCreate,
 }) {
-  const { data: projects = [] } = useGetProjectsQuery();
+  const { data: projects = [] } = useGetProjectsListQuery();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -102,24 +103,20 @@ export default function CreateTaskModal({
 
           <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 2 }}>
             <Box sx={{ flex: 1, minWidth: 0, width: "100%" }}>
-              <FormControl fullWidth>
-                <InputLabel>Project</InputLabel>
-                <Select
-                  name="projectId"
-                  value={form.projectId || ""}
-                  label="Project"
-                  onChange={handleChange}
-                >
-                  <MenuItem value="">
-                    <em>None</em>
-                  </MenuItem>
-                  {projects.map((proj) => (
-                    <MenuItem key={proj.id} value={proj.id}>
-                      {proj.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              <Autocomplete
+                options={projects}
+                getOptionLabel={(option) => option.name || ""}
+                value={projects.find((p) => p.id === form.projectId) || null}
+                onChange={(_, newValue) => {
+                  setForm({ ...form, projectId: newValue?.id || "" });
+                }}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                renderInput={(params) => (
+                  <TextField {...params} label="Project" placeholder="Search projects..." />
+                )}
+                size="medium"
+                fullWidth
+              />
             </Box>
 
             <Box sx={{ flex: 1, minWidth: 0, width: "100%" }}>

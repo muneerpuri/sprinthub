@@ -103,9 +103,10 @@ export default function ProjectsPage() {
             size="small"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            InputProps={{
-              startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment>,
-            }}
+            
+            // InputProps={{
+            //   startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment>,
+            // }}
             sx={{ width: { xs: "100%", sm: "250px", md: "300px" } }}
           />
           <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={handleOpenNew} sx={{ width: { xs: "100%", sm: "auto" }, whiteSpace: "nowrap" }}>

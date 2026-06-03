@@ -39,6 +39,19 @@ export const projectsApi = baseApi.injectEndpoints({
       providesTags: ["Project"],
     }),
 
+    /** Lightweight list of all projects (id + name only) for dropdown usage. */
+    getProjectsList: builder.query({
+      queryFn: async () => {
+        const { data, error } = await supabase
+          .from("projects")
+          .select("id, name")
+          .order("name", { ascending: true });
+        if (error) return { error };
+        return { data };
+      },
+      providesTags: ["Project"],
+    }),
+
     getProjectById: builder.query({
       queryFn: async (id) => {
         const { data, error } = await supabase
@@ -100,6 +113,7 @@ export const projectsApi = baseApi.injectEndpoints({
 
 export const {
   useGetProjectsQuery,
+  useGetProjectsListQuery,
   useGetProjectByIdQuery,
   useAddProjectMutation,
   useUpdateProjectMutation,

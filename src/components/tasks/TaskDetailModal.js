@@ -16,13 +16,14 @@ import {
   Paper,
   OutlinedInput,
   Chip,
+  Autocomplete,
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
 import {
-  useGetProjectsQuery,
+  useGetProjectsListQuery,
   useGetCommentsQuery,
   useAddCommentMutation,
 } from "../../lib/apiSlice";
@@ -58,7 +59,7 @@ export default function TaskDetailModal({
   onSave,
   onDelete,
 }) {
-  const { data: projects = [] } = useGetProjectsQuery();
+  const { data: projects = [] } = useGetProjectsListQuery();
   const { data: comments = [] } = useGetCommentsQuery(activeTask?.id, {
     skip: !activeTask,
   });
@@ -127,24 +128,19 @@ export default function TaskDetailModal({
             }}
           >
             <Box sx={{ flex: 1 }}>
-              <FormControl fullWidth>
-                <InputLabel>Project</InputLabel>
-                <Select
-                  name="projectId"
-                  value={activeTask.projectId || ""}
-                  label="Project"
-                  onChange={handleChange}
-                >
-                  <MenuItem value="">
-                    <em>None</em>
-                  </MenuItem>
-                  {projects.map((proj) => (
-                    <MenuItem key={proj.id} value={proj.id}>
-                      {proj.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              <Autocomplete
+                options={projects}
+                getOptionLabel={(option) => option.name || ""}
+                value={projects.find((p) => p.id === activeTask.projectId) || null}
+                onChange={(_, newValue) => {
+                  setActiveTask({ ...activeTask, projectId: newValue?.id || "" });
+                }}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                renderInput={(params) => (
+                  <TextField {...params} label="Project" placeholder="Search projects..." />
+                )}
+                fullWidth
+              />
             </Box>
 
             <Box sx={{ flex: 1 }}>

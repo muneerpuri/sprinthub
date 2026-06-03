@@ -19,6 +19,7 @@ export {
 } from "./api/tasksApi";
 export {
   useGetProjectsQuery,
+  useGetProjectsListQuery,
   useGetProjectByIdQuery,
   useAddProjectMutation,
   useUpdateProjectMutation,
