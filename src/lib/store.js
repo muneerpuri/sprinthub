@@ -3,7 +3,7 @@ import { apiSlice } from "./apiSlice";
 
 /**
  * Configures and exports the Redux store.
- * It includes the API slice reducer and middleware.
+ * Integrates the RTK Query API slice and its middleware.
  */
 export const store = configureStore({
   reducer: {
