@@ -136,9 +136,9 @@ export default function ProjectMembersTab({
                   </TableCell>
                   <TableCell>{member.users?.email}</TableCell>
                   {member?.userId === ownerId ? (
-                    <TableCell>Owner</TableCell>
-                  ) : (member?.userId !== ownerId ? <TableCell>
-                    {member?.role || "NA"}
+                    <TableCell>OWNER</TableCell>
+                  ) : (!canManage? <TableCell>
+                    {member?.role?.toUpperCase() || "NA"}
                   </TableCell> :
                     <TableCell>
                       {canManage ? (

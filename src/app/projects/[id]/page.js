@@ -67,7 +67,7 @@ export default function ProjectDetailsPage() {
   const memberRecord = members.find((m) => m.userId === currentUser);
   const userRole = isProjectOwner ? "owner" : memberRecord?.role || "viewer";
 
-  const canManageMembers = userRole === "owner" || userRole === "editor";
+  const canManageMembers = userRole === "owner";
   const canEditProject = userRole === "owner" || userRole === "editor";
   const canDeleteProject = userRole === "owner";
 
