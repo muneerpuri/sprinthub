@@ -1,9 +1,19 @@
-// components/tasks/TaskHeader.js
 "use client";
 import React from "react";
 import { Box, Typography, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 
+/**
+ * @typedef {Object} TaskHeaderProps
+ * @property {function(): void} onCreateClick - Callback function to be called when the "Create Task" button is clicked.
+ */
+
+/**
+ * TaskHeader component displays the title for the Kanban board and a button to create new tasks.
+ *
+ * @param {TaskHeaderProps} props - The component props.
+ * @returns {JSX.Element} The TaskHeader component.
+ */
 export default function TaskHeader({ onCreateClick }) {
   return (
     <Box

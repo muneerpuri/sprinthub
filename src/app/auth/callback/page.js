@@ -4,34 +4,39 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "../../../utils/supabase";
 import { Box, CircularProgress, Typography } from "@mui/material";
 
+/**
+ * VerifyEmailLogic component handles the email verification process after a user clicks a confirmation link.
+ * It extracts the token from the URL, verifies it with Supabase, and redirects the user accordingly.
+ *
+ * @returns {JSX.Element} A loading spinner and message during the verification process.
+ */
 function VerifyEmailLogic() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   useEffect(() => {
     const handleEmailVerify = async () => {
-      // 1. Grab the TokenHash from the URL (your template named it 'code')
       const token_hash = searchParams.get("code");
 
       if (token_hash) {
-        // 2. Explicitly verify the token
         const { data, error } = await supabase.auth.verifyOtp({
           token_hash,
-          type: "signup", // 'signup' is the required type for email confirmation
+          type: "signup",
         });
 
         if (error) {
           console.error("Verification error:", error.message);
-          router.push("/auth"); // Optionally add ?error=failed to show a toast on the login page
+          router.push("/auth");
           return;
         }
 
-        // 3. Verification successful! User is automatically logged in.
         router.push("/tasks");
       } else {
-        // Fallback: If there is no token in the URL, check if they are already logged in
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
+
         if (session) {
           router.push("/tasks");
         } else {
@@ -44,7 +49,16 @@ function VerifyEmailLogic() {
   }, [router, searchParams]);
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", height: "100vh", alignItems: "center", justifyContent: "center", bgcolor: "#fafafa" }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100vh",
+        alignItems: "center",
+        justifyContent: "center",
+        bgcolor: "#fafafa",
+      }}
+    >
       <CircularProgress size={60} sx={{ mb: 3 }} />
       <Typography variant="h6" color="text.secondary">
         Verifying your email...
@@ -53,14 +67,28 @@ function VerifyEmailLogic() {
   );
 }
 
-// Wrap in Suspense to prevent Next.js client-side de-opt build warnings
+/**
+ * AuthCallback component serves as a wrapper for VerifyEmailLogic, providing Suspense fallback.
+ * This is to prevent Next.js client-side de-optimization warnings.
+ *
+ * @returns {JSX.Element} The VerifyEmailLogic component wrapped in Suspense.
+ */
 export default function AuthCallback() {
   return (
-    <Suspense fallback={
-      <Box sx={{ display: "flex", height: "100vh", alignItems: "center", justifyContent: "center" }}>
-        <CircularProgress />
-      </Box>
-    }>
+    <Suspense
+      fallback={
+        <Box
+          sx={{
+            display: "flex",
+            height: "100vh",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      }
+    >
       <VerifyEmailLogic />
     </Suspense>
   );

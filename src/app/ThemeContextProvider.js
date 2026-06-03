@@ -3,16 +3,34 @@ import React, { createContext, useState, useMemo } from "react";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 
+/**
+ * Context for managing color mode (light/dark).
+ * Provides a toggle function for switching between modes.
+ * @type {React.Context<{toggleColorMode: () => void}>}
+ */
 export const ColorModeContext = createContext({ toggleColorMode: () => {} });
 
+/**
+ * @typedef {Object} ThemeContextProviderProps
+ * @property {React.ReactNode} children - The children to be rendered within the theme provider.
+ */
+
+/**
+ * ThemeContextProvider component that provides Material-UI theme and color mode context to the application.
+ * It manages the light/dark mode state and creates a theme based on the current mode.
+ *
+ * @param {ThemeContextProviderProps} props - The component props.
+ * @returns {JSX.Element} The ThemeProvider and ColorModeContext.Provider components.
+ */
 export default function ThemeContextProvider({ children }) {
   const [mode, setMode] = useState("light");
 
   const colorMode = useMemo(
     () => ({
-      toggleColorMode: () => setMode((prev) => (prev === "light" ? "dark" : "light")),
+      toggleColorMode: () =>
+        setMode((prev) => (prev === "light" ? "dark" : "light")),
     }),
-    []
+    [],
   );
 
   const theme = useMemo(
@@ -54,7 +72,10 @@ export default function ThemeContextProvider({ children }) {
                 borderRadius: "8px",
                 padding: "8px 16px",
                 transition: "all 0.2s ease-in-out",
-                "&:hover": { transform: "translateY(-1px)", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" },
+                "&:hover": {
+                  transform: "translateY(-1px)",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                },
               },
             },
           },
@@ -62,9 +83,10 @@ export default function ThemeContextProvider({ children }) {
             styleOverrides: {
               root: {
                 backgroundImage: "none",
-                boxShadow: mode === "light" 
-                  ? "0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05)" 
-                  : "0 4px 6px -1px rgb(0 0 0 / 0.2)",
+                boxShadow:
+                  mode === "light"
+                    ? "0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05)"
+                    : "0 4px 6px -1px rgb(0 0 0 / 0.2)",
               },
             },
           },
@@ -82,7 +104,9 @@ export default function ThemeContextProvider({ children }) {
                 "& .MuiOutlinedInput-root": {
                   borderRadius: "10px",
                   transition: "all 0.2s",
-                  "&.Mui-focused": { boxShadow: "0 0 0 3px rgba(99, 102, 241, 0.2)" },
+                  "&.Mui-focused": {
+                    boxShadow: "0 0 0 3px rgba(99, 102, 241, 0.2)",
+                  },
                 },
               },
             },
@@ -94,7 +118,7 @@ export default function ThemeContextProvider({ children }) {
           },
         },
       }),
-    [mode]
+    [mode],
   );
 
   return (

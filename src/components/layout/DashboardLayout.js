@@ -1,9 +1,21 @@
 "use client";
 import React, { useState, useContext } from "react";
 import {
-  Box, Drawer, AppBar, Toolbar, Typography, List, ListItem,
-  ListItemIcon, ListItemText, IconButton, Avatar, useTheme, ListItemButton,
-  Menu, MenuItem
+  Box,
+  Drawer,
+  AppBar,
+  Toolbar,
+  Typography,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  IconButton,
+  Avatar,
+  useTheme,
+  ListItemButton,
+  Menu,
+  MenuItem,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import DashboardIcon from "@mui/icons-material/Dashboard";
@@ -20,6 +32,18 @@ import { useDispatch } from "react-redux";
 
 const drawerWidth = 260;
 
+/**
+ * @typedef {Object} DashboardLayoutProps
+ * @property {React.ReactNode} children - The children to be rendered within the dashboard content area.
+ */
+
+/**
+ * DashboardLayout component provides the main layout for the application dashboard.
+ * It includes a navigation drawer, app bar, and handles user authentication status and theme toggling.
+ *
+ * @param {DashboardLayoutProps} props - The component props.
+ * @returns {JSX.Element} The DashboardLayout component.
+ */
 export default function DashboardLayout({ children }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -45,16 +69,16 @@ export default function DashboardLayout({ children }) {
 
       try {
         const { data, error } = await supabase
-          .from('users')
-          .select('id, firstName, lastName, email')
-          .eq('id', userId)
+          .from("users")
+          .select("id, firstName, lastName, email")
+          .eq("id", userId)
           .single();
 
         if (!error && data) {
           setUserData(data);
         }
       } catch (err) {
-        console.error('Error fetching user details:', err);
+        console.error("Error fetching user details:", err);
       } finally {
         setLoading(false);
       }
@@ -115,7 +139,7 @@ export default function DashboardLayout({ children }) {
           SprintHub
         </Typography>
       </Toolbar>
-      
+
       <List sx={{ px: 2, flexGrow: 1 }}>
         {menuItems.map((item) => {
           const isActive = pathname === item.path;
@@ -132,23 +156,30 @@ export default function DashboardLayout({ children }) {
                   }),
                 }}
               >
-                <ListItemIcon sx={{ minWidth: 40, color: isActive ? "primary.main" : "inherit" }}>
+                <ListItemIcon
+                  sx={{
+                    minWidth: 40,
+                    color: isActive ? "primary.main" : "inherit",
+                  }}
+                >
                   {item.icon}
                 </ListItemIcon>
-                <ListItemText 
-                  primary={item.title} 
-                  sx={{fontWeight: isActive ? 600 : 400}}
+                <ListItemText
+                  primary={item.title}
+                  sx={{ fontWeight: isActive ? 600 : 400 }}
                 />
               </ListItemButton>
             </ListItem>
           );
         })}
       </List>
-      
+
       <List sx={{ px: 2, pb: 2 }}>
         <ListItem disablePadding>
           <ListItemButton onClick={handleLogout} sx={{ borderRadius: 1.5 }}>
-            <ListItemIcon sx={{ minWidth: 40 }}><LogoutIcon color="error" /></ListItemIcon>
+            <ListItemIcon sx={{ minWidth: 40 }}>
+              <LogoutIcon color="error" />
+            </ListItemIcon>
             <ListItemText primary="Logout" color="error" />
           </ListItemButton>
         </ListItem>
@@ -158,38 +189,58 @@ export default function DashboardLayout({ children }) {
 
   return (
     <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
-      <AppBar 
-        position="fixed" 
+      <AppBar
+        position="fixed"
         elevation={0}
-        sx={{ 
-          width: { sm: `calc(100% - ${drawerWidth}px)` }, 
-          ml: { sm: `${drawerWidth}px` }, 
-          bgcolor: "background.paper", 
+        sx={{
+          width: { sm: `calc(100% - ${drawerWidth}px)` },
+          ml: { sm: `${drawerWidth}px` },
+          bgcolor: "background.paper",
           borderBottom: 1,
           borderColor: "divider",
-          color: "text.primary" 
+          color: "text.primary",
         }}
       >
         <Toolbar>
-          <IconButton edge="start" onClick={() => setMobileOpen(!mobileOpen)} sx={{ mr: 2, display: { sm: "none" } }}>
+          <IconButton
+            edge="start"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            sx={{ mr: 2, display: { sm: "none" } }}
+          >
             <MenuIcon />
           </IconButton>
           <Box sx={{ flexGrow: 1 }} />
-          
+
           {/* THEME TOGGLE BUTTON */}
-          <IconButton onClick={colorMode.toggleColorMode} color="inherit" sx={{ mr: 2 }}>
-            {theme.palette.mode === "dark" ? <LightModeIcon /> : <DarkModeIcon />}
+          <IconButton
+            onClick={colorMode.toggleColorMode}
+            color="inherit"
+            sx={{ mr: 2 }}
+          >
+            {theme.palette.mode === "dark" ? (
+              <LightModeIcon />
+            ) : (
+              <DarkModeIcon />
+            )}
           </IconButton>
 
           {/* USER AVATAR WITH MENU */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, cursor: "pointer" }} onClick={handleAvatarClick}>
-            <Avatar 
-              sx={{ 
-                width: 35, 
-                height: 35, 
-                bgcolor: "primary.main", 
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              cursor: "pointer",
+            }}
+            onClick={handleAvatarClick}
+          >
+            <Avatar
+              sx={{
+                width: 35,
+                height: 35,
+                bgcolor: "primary.main",
                 fontSize: 14,
-                fontWeight: "bold"
+                fontWeight: "bold",
               }}
             >
               {getInitials()}
@@ -201,12 +252,21 @@ export default function DashboardLayout({ children }) {
             anchorEl={anchorEl}
             open={Boolean(anchorEl)}
             onClose={handleMenuClose}
-            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-            transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            transformOrigin={{ vertical: "top", horizontal: "right" }}
           >
-            <MenuItem disabled sx={{ flexDirection: "column", alignItems: "flex-start", py: 1.5 }}>
+            <MenuItem
+              disabled
+              sx={{
+                flexDirection: "column",
+                alignItems: "flex-start",
+                py: 1.5,
+              }}
+            >
               <Typography variant="body2" fontWeight="600">
-                {userData ? `${userData.firstName} ${userData.lastName}` : "User"}
+                {userData
+                  ? `${userData.firstName} ${userData.lastName}`
+                  : "User"}
               </Typography>
               <Typography variant="caption" color="text.secondary">
                 {userData?.email || ""}
@@ -216,25 +276,47 @@ export default function DashboardLayout({ children }) {
         </Toolbar>
       </AppBar>
 
-      <Box component="nav" sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}>
+      <Box
+        component="nav"
+        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+      >
         <Drawer
           variant="temporary"
           open={mobileOpen}
           onClose={() => setMobileOpen(false)}
-          sx={{ display: { xs: "block", sm: "none" }, "& .MuiDrawer-paper": { width: drawerWidth, borderRight: "none" } }}
+          sx={{
+            display: { xs: "block", sm: "none" },
+            "& .MuiDrawer-paper": { width: drawerWidth, borderRight: "none" },
+          }}
         >
           {drawerContent}
         </Drawer>
         <Drawer
           variant="permanent"
-          sx={{ display: { xs: "none", sm: "block" }, "& .MuiDrawer-paper": { width: drawerWidth, borderRight: 1, borderColor: "divider" } }}
+          sx={{
+            display: { xs: "none", sm: "block" },
+            "& .MuiDrawer-paper": {
+              width: drawerWidth,
+              borderRight: 1,
+              borderColor: "divider",
+            },
+          }}
           open
         >
           {drawerContent}
         </Drawer>
       </Box>
 
-      <Box component="main" sx={{ flexGrow: 1, p: 4, mt: 8, bgcolor: "background.default", overflow: "auto" }}>
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          p: 4,
+          mt: 8,
+          bgcolor: "background.default",
+          overflow: "auto",
+        }}
+      >
         {children}
       </Box>
     </Box>
