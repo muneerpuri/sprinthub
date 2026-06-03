@@ -29,6 +29,8 @@ import { useRouter, usePathname } from "next/navigation";
 import { ColorModeContext } from "../../app/ThemeContextProvider";
 import { useGetCurrentUserQuery, apiSlice } from "../../lib/apiSlice";
 import { useDispatch } from "react-redux";
+import ErrorBoundary from "../error/ErrorBoundary";
+import ErrorFallbackUI from "../error/ErrorFallbackUI";
 
 const drawerWidth = 260;
 
@@ -418,7 +420,9 @@ export default function DashboardLayout({ children }) {
           overflow: "auto",
         }}
       >
-        {children}
+        <ErrorBoundary FallbackComponent={ErrorFallbackUI}>
+          {children}
+        </ErrorBoundary>
       </Box>
     </Box>
   );
