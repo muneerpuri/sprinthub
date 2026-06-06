@@ -53,25 +53,18 @@ export default function ProjectsPage() {
 
   const [addProject] = useAddProjectMutation();
   const [modalOpen, setModalOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    color: "#3b82f6",
-    isArchived: false,
-  });
 
   const handleOpenDetails = (projectId) => {
     router.push(`/projects/${projectId}`);
   };
 
   const handleOpenNew = () => {
-    setFormData({ name: "", description: "", color: "#3b82f6", isArchived: false });
     setModalOpen(true);
   };
 
-  const handleSave = async () => {
+  const handleSave = async (values) => {
     try {
-      await addProject(formData).unwrap();
+      await addProject(values).unwrap();
       toast.success("Project created!");
       setModalOpen(false);
       // Optional: reset to page 1 after adding to see the new project
@@ -161,8 +154,6 @@ export default function ProjectsPage() {
       <ProjectModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        form={formData}
-        setForm={setFormData}
         onSave={handleSave}
         isEditing={false}
       />

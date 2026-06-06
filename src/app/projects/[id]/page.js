@@ -42,12 +42,6 @@ export default function ProjectDetailsPage() {
 
   const [currentTab, setCurrentTab] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    color: "#3b82f6",
-    isArchived: false,
-  });
 
   const { data: currentUser } = useGetCurrentUserQuery();
   const { data: project, isLoading: isProjectLoading } =
@@ -74,19 +68,12 @@ export default function ProjectDetailsPage() {
   const projectTasks = allTasks.filter((t) => t.projectId === projectId);
 
   const handleOpenEdit = () => {
-    setFormData({
-      id: project?.id,
-      name: project?.name || "",
-      description: project?.description || "",
-      color: project?.color || "#3b82f6",
-      isArchived: project?.isArchived || false,
-    });
     setModalOpen(true);
   };
 
-  const handleSaveProject = async () => {
+  const handleSaveProject = async (values) => {
     try {
-      await updateProject(formData).unwrap();
+      await updateProject({ id: projectId, ...values }).unwrap();
       toast.success("Project updated!");
       setModalOpen(false);
     } catch (error) {
@@ -212,10 +199,14 @@ export default function ProjectDetailsPage() {
       <ProjectModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        form={formData}
-        setForm={setFormData}
         onSave={handleSaveProject}
         isEditing={true}
+        initialValues={{
+          name: project?.name || "",
+          description: project?.description || "",
+          color: project?.color || "#3b82f6",
+          isArchived: project?.isArchived || false,
+        }}
       />
     </DashboardLayout>
   );

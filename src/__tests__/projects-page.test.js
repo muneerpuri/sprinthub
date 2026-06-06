@@ -24,7 +24,18 @@ jest.mock(
     ({ open, onClose, onSave }) =>
       open ? (
         <div data-testid="project-modal">
-          <button onClick={onSave}>Create Project</button>
+          <button
+            onClick={() =>
+              onSave({
+                name: "Test Project",
+                description: "Test description",
+                color: "#3b82f6",
+                isArchived: false,
+              })
+            }
+          >
+            Create Project
+          </button>
           <button onClick={onClose}>Close</button>
         </div>
       ) : null,
@@ -131,8 +142,8 @@ describe("ProjectsPage", () => {
 
     await waitFor(() => {
       expect(addProjectMock).toHaveBeenCalledWith({
-        name: "",
-        description: "",
+        name: "Test Project",
+        description: "Test description",
         color: "#3b82f6",
         isArchived: false,
       });

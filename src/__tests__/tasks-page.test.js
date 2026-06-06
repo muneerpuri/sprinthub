@@ -34,19 +34,55 @@ jest.mock("../components/tasks/TaskHeader", () => ({ onCreateClick }) => (
 ));
 jest.mock(
   "../components/tasks/CreateTaskModal",
-  () =>
-    ({ open, onClose, form, setForm, onCreate }) =>
+  () => {
+    let internalForm = {
+      title: "",
+      projectId: "p1",
+      description: "",
+      dueDate: "2025-07-15T00:00:00.000Z",
+      priority: "medium",
+      storyPoints: 1,
+      labels: [],
+    };
+    return ({ open, onClose, onCreate }) =>
       open ? (
         <div data-testid="create-modal">
           <input
             data-testid="task-title-input"
-            value={form.title}
-            onChange={(e) => setForm({ ...form, title: e.target.value })}
+            value={internalForm.title}
+            onChange={(e) => {
+              internalForm = { ...internalForm, title: e.target.value };
+            }}
           />
-          <button onClick={onCreate}>Save Task</button>
-          <button onClick={onClose}>Close</button>
+          <button
+            onClick={() =>
+              onCreate({
+                ...internalForm,
+                title: internalForm.title.trim(),
+              })
+            }
+          >
+            Save Task
+          </button>
+          <button
+            onClick={() => {
+              internalForm = {
+                title: "",
+                projectId: "p1",
+                description: "",
+                dueDate: "2025-07-15T00:00:00.000Z",
+                priority: "medium",
+                storyPoints: 1,
+                labels: [],
+              };
+              onClose();
+            }}
+          >
+            Close
+          </button>
         </div>
-      ) : null,
+      ) : null;
+  },
 );
 jest.mock(
   "../components/tasks/TaskDetailModal",
@@ -121,7 +157,7 @@ describe("TasksPage", () => {
     expect(screen.getByText("Task 2")).toBeInTheDocument();
   });
 
-  it("handles opening task modal, warning for empty title, and creating task successfully", async () => {
+  it("handles opening task modal, entering title, and creating task successfully", async () => {
     render(<TasksPage />);
 
     const openBtn = screen.getByText("Create New Task");
@@ -129,24 +165,20 @@ describe("TasksPage", () => {
 
     expect(screen.getByTestId("create-modal")).toBeInTheDocument();
 
-    const saveBtn = screen.getByText("Save Task");
-
-    // Simulate empty title submission
-    fireEvent.click(saveBtn);
-    expect(toast.warning).toHaveBeenCalledWith("Task title required");
-
     // Enter title
     const input = screen.getByTestId("task-title-input");
     fireEvent.change(input, { target: { value: "New Task Title" } });
 
-    // Save task again
+    // Save task
+    const saveBtn = screen.getByText("Save Task");
     fireEvent.click(saveBtn);
 
     await waitFor(() => {
       expect(addTaskMock).toHaveBeenCalledWith({
         title: "New Task Title",
+        projectId: "p1",
         description: "",
-        dueDate: "",
+        dueDate: "2025-07-15T00:00:00.000Z",
         priority: "medium",
         storyPoints: 1,
         labels: [],

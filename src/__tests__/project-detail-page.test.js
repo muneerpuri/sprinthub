@@ -74,10 +74,21 @@ jest.mock(
 jest.mock(
   "../components/projects/ProjectModal",
   () =>
-    ({ open, onClose, onSave }) =>
+    ({ open, onClose, onSave, initialValues }) =>
       open ? (
         <div data-testid="project-modal">
-          <button onClick={onSave}>Save Project</button>
+          <button
+            onClick={() =>
+              onSave({
+                name: initialValues?.name || "Default Name",
+                description: initialValues?.description || "",
+                color: initialValues?.color || "#3b82f6",
+                isArchived: initialValues?.isArchived || false,
+              })
+            }
+          >
+            Save Project
+          </button>
           <button onClick={onClose}>Close</button>
         </div>
       ) : null,

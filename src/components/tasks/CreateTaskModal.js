@@ -1,5 +1,7 @@
 "use client";
 import React from "react";
+import { useFormik } from "formik";
+import * as yup from "yup";
 import {
   Dialog,
   DialogTitle,
@@ -32,28 +34,36 @@ const AVAILABLE_LABELS = [
   "Design",
 ];
 
-/**
- * @typedef {Object} TaskForm
- * @property {string} title - The title of the task.
- * @property {string} [projectId] - The ID of the project the task belongs to.
- * @property {string} [dueDate] - The due date of the task in ISO format.
- * @property {string} [description] - The description of the task.
- * @property {string} [priority] - The priority of the task (e.g., "high", "medium", "low").
- * @property {number} [storyPoints] - The story points assigned to the task.
- * @property {string[]} [labels] - An array of labels for the task.
- */
+const validationSchema = yup.object({
+  title: yup
+    .string()
+    .required("Task title is required")
+    .test(
+      "not-only-whitespace",
+      "Task title cannot be empty or only spaces",
+      (val) => val && val.trim().length > 0,
+    ),
+  projectId: yup
+    .string()
+    .required("Project is required – tasks must belong to a project"),
+  description: yup.string().nullable(),
+  dueDate: yup.string().required("Due date is required"),
+  priority: yup.string().nullable(),
+  storyPoints: yup.number().nullable(),
+  labels: yup.array().of(yup.string()).nullable(),
+});
 
 /**
  * @typedef {Object} CreateTaskModalProps
  * @property {boolean} open - Whether the modal is open.
  * @property {function(): void} onClose - Callback function to close the modal.
- * @property {TaskForm} form - The form data for the new task.
- * @property {function(TaskForm): void} setForm - Function to update the form data.
- * @property {function(): void} onCreate - Callback function to create the task.
+ * @property {function(Object): void} onCreate - Callback function to create the task with validated form values.
+ * @property {Object} [initialValues] - Initial form values.
  */
 
 /**
  * CreateTaskModal component for creating new tasks.
+ * Uses Formik for form state management and Yup for validation.
  *
  * @param {CreateTaskModalProps} props - The component props.
  * @returns {JSX.Element} The CreateTaskModal component.
@@ -61,58 +71,97 @@ const AVAILABLE_LABELS = [
 export default function CreateTaskModal({
   open,
   onClose,
-  form,
-  setForm,
   onCreate,
+  initialValues = {
+    title: "",
+    projectId: "",
+    description: "",
+    dueDate: "",
+    priority: "medium",
+    storyPoints: 1,
+    labels: [],
+  },
 }) {
   const { data: projects = [] } = useGetProjectsListQuery();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const handleChange = (e) => {
-    const value =
-      e.target.name === "storyPoints"
-        ? e.target.value
-          ? Number(e.target.value)
-          : null
-        : e.target.value;
+  const formik = useFormik({
+    initialValues,
+    validationSchema,
+    enableReinitialize: true,
+    onSubmit: (values) => {
+      onCreate({ ...values, title: values.title.trim() });
+    },
+  });
 
-    setForm({ ...form, [e.target.name]: value });
+  const handleClose = () => {
+    formik.resetForm();
+    onClose();
   };
 
   const handleDateChange = (newValue) => {
-    setForm({
-      ...form,
-      dueDate: newValue ? newValue.toISOString() : null,
-    });
+    formik.setFieldValue("dueDate", newValue ? newValue.toISOString() : null);
+    formik.setFieldTouched("dueDate", true, false);
   };
 
+  const selectedProject = projects.find(
+    (p) => p.id === formik.values.projectId,
+  );
+
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" fullScreen={isMobile}>
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      fullWidth
+      maxWidth="sm"
+      fullScreen={isMobile}
+    >
       <DialogTitle fontWeight="bold">Create New Task</DialogTitle>
-      <DialogContent dividers>
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, pt: 1 }}>
-          <TextField
-            label="Title"
-            name="title"
-            value={form.title || ""}
-            onChange={handleChange}
-            fullWidth
-            required
-          />
+      <form onSubmit={formik.handleSubmit}>
+        <DialogContent dividers>
+          <Box
+            sx={{ display: "flex", flexDirection: "column", gap: 2.5, pt: 1 }}
+          >
+            <TextField
+              label="Title"
+              name="title"
+              value={formik.values.title}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              fullWidth
+              required
+              error={formik.touched.title && Boolean(formik.errors.title)}
+              helperText={formik.touched.title && formik.errors.title}
+            />
 
           <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 2 }}>
             <Box sx={{ flex: 1, minWidth: 0, width: "100%" }}>
               <Autocomplete
                 options={projects}
                 getOptionLabel={(option) => option.name || ""}
-                value={projects.find((p) => p.id === form.projectId) || null}
+                value={selectedProject || null}
                 onChange={(_, newValue) => {
-                  setForm({ ...form, projectId: newValue?.id || "" });
+                  formik.setFieldValue("projectId", newValue?.id || "");
+                  formik.setFieldTouched("projectId", true, false);
                 }}
-                isOptionEqualToValue={(option, value) => option.id === value.id}
+                onBlur={() => formik.setFieldTouched("projectId", true, true)}
+                isOptionEqualToValue={(option, value) =>
+                  option.id === value.id
+                }
                 renderInput={(params) => (
-                  <TextField {...params} label="Project" placeholder="Search projects..." />
+                  <TextField
+                    {...params}
+                    label="Project *"
+                    placeholder="Search projects..."
+                    error={
+                      formik.touched.projectId &&
+                      Boolean(formik.errors.projectId)
+                    }
+                    helperText={
+                      formik.touched.projectId && formik.errors.projectId
+                    }
+                  />
                 )}
                 size="medium"
                 fullWidth
@@ -122,10 +171,23 @@ export default function CreateTaskModal({
             <Box sx={{ flex: 1, minWidth: 0, width: "100%" }}>
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
-                  label="Due Date"
-                  value={form.dueDate ? dayjs(form.dueDate) : null}
+                  label="Due Date *"
+                  value={
+                    formik.values.dueDate ? dayjs(formik.values.dueDate) : null
+                  }
                   onChange={handleDateChange}
-                  slotProps={{ textField: { fullWidth: true } }}
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      error:
+                        formik.touched.dueDate &&
+                        Boolean(formik.errors.dueDate),
+                      helperText:
+                        formik.touched.dueDate && formik.errors.dueDate,
+                      onBlur: () =>
+                        formik.setFieldTouched("dueDate", true, true),
+                    },
+                  }}
                 />
               </LocalizationProvider>
             </Box>
@@ -134,8 +196,9 @@ export default function CreateTaskModal({
           <TextField
             label="Description"
             name="description"
-            value={form.description || ""}
-            onChange={handleChange}
+            value={formik.values.description || ""}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
             fullWidth
             multiline
             rows={3}
@@ -147,9 +210,9 @@ export default function CreateTaskModal({
                 <InputLabel>Priority</InputLabel>
                 <Select
                   name="priority"
-                  value={form.priority || "medium"}
+                  value={formik.values.priority || "medium"}
                   label="Priority"
-                  onChange={handleChange}
+                  onChange={formik.handleChange}
                 >
                   <MenuItem value="high">High</MenuItem>
                   <MenuItem value="medium">Medium</MenuItem>
@@ -163,9 +226,14 @@ export default function CreateTaskModal({
                 <InputLabel>Story Points</InputLabel>
                 <Select
                   name="storyPoints"
-                  value={form.storyPoints || ""}
+                  value={formik.values.storyPoints ?? ""}
                   label="Story Points"
-                  onChange={handleChange}
+                  onChange={(e) => {
+                    formik.setFieldValue(
+                      "storyPoints",
+                      e.target.value !== "" ? Number(e.target.value) : null,
+                    );
+                  }}
                 >
                   <MenuItem value="">
                     <em>None</em>
@@ -184,8 +252,8 @@ export default function CreateTaskModal({
             <Select
               multiple
               name="labels"
-              value={form.labels || []}
-              onChange={handleChange}
+              value={formik.values.labels || []}
+              onChange={formik.handleChange}
               input={<OutlinedInput label="Labels" />}
               renderValue={(selected) => (
                 <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
@@ -205,13 +273,19 @@ export default function CreateTaskModal({
         </Box>
       </DialogContent>
       <DialogActions sx={{ p: 2 }}>
-        <Button onClick={onClose} color="inherit">
+        <Button onClick={handleClose} color="inherit">
           Cancel
         </Button>
-        <Button onClick={onCreate} variant="contained" color="primary">
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          disabled={!formik.dirty || !formik.isValid}
+        >
           Create Task
         </Button>
       </DialogActions>
+    </form>
     </Dialog>
   );
 }

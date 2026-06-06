@@ -42,15 +42,6 @@ export default function TasksPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [activeTask, setActiveTask] = useState(null);
 
-  const [form, setForm] = useState({
-    title: "",
-    description: "",
-    dueDate: "",
-    priority: "medium",
-    storyPoints: 1,
-    labels: [],
-  });
-
   useEffect(() => {
     if (tasksData) {
       setBoard(buildKanbanBoard(tasksData));
@@ -63,20 +54,11 @@ export default function TasksPage() {
     }
   }, []);
 
-  const handleCreate = async () => {
-    if (!form.title.trim()) return toast.warning("Task title required");
+  const handleCreate = async (values) => {
     try {
-      await addTask({ ...form, status: "PENDING" }).unwrap();
+      await addTask({ ...values, status: "PENDING" }).unwrap();
       toast.success("Task created ✨");
       setCreateOpen(false);
-      setForm({
-        title: "",
-        description: "",
-        dueDate: "",
-        priority: "medium",
-        storyPoints: 1,
-        labels: [],
-      });
     } catch (err) {
       toast.error("Create failed");
     }
@@ -166,8 +148,6 @@ export default function TasksPage() {
         <CreateTaskModal
           open={createOpen}
           onClose={() => setCreateOpen(false)}
-          form={form}
-          setForm={setForm}
           onCreate={handleCreate}
         />
 
