@@ -12,6 +12,7 @@ import {
   useGetTasksQuery,
   useUpdateProjectMutation,
   useDeleteProjectMutation,
+  useGetWorkspaceMembersQuery,
 } from "@/lib/apiSlice";
 import { toast } from "react-toastify";
 
@@ -26,6 +27,7 @@ jest.mock("@/lib/apiSlice", () => ({
   useRemoveMemberMutation: jest.fn(),
   useUpdateProjectMutation: jest.fn(),
   useDeleteProjectMutation: jest.fn(),
+  useGetWorkspaceMembersQuery: jest.fn(),
 }));
 
 const mockPush = jest.fn();
@@ -163,6 +165,7 @@ describe("ProjectDetailsPage", () => {
     useRemoveMemberMutation.mockReturnValue([removeMemberMock]);
     useUpdateProjectMutation.mockReturnValue([updateProjectMock]);
     useDeleteProjectMutation.mockReturnValue([deleteProjectMock]);
+    useGetWorkspaceMembersQuery.mockReturnValue({ data: [], isLoading: false });
 
     window.confirm = jest.fn(() => true);
   });
@@ -270,7 +273,30 @@ describe("ProjectDetailsPage", () => {
     });
   });
 
-  it("handles project deletion successfully", async () => {
+  it("blocks deletion when project has active tasks", async () => {
+    render(<ProjectDetailsPage />);
+
+    const deleteBtn = screen.getByText("Delete");
+    fireEvent.click(deleteBtn);
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith(
+        "Cannot delete project with 1 active task(s). Delete or reassign the tasks first.",
+      );
+      expect(window.confirm).not.toHaveBeenCalled();
+      expect(deleteProjectMock).not.toHaveBeenCalled();
+    });
+  });
+
+  it("handles project deletion successfully when no tasks exist", async () => {
+    // Override mock tasks to have zero tasks for this project
+    useGetTasksQuery.mockReturnValue({
+      data: [
+        { id: "t2", projectId: "p2", title: "Task for P2" },
+      ],
+      isLoading: false,
+    });
+
     render(<ProjectDetailsPage />);
 
     const deleteBtn = screen.getByText("Delete");

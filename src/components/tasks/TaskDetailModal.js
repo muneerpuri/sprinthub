@@ -42,12 +42,10 @@ export default function TaskDetailModal({
   const { data: projects = [] } = useGetProjectsListQuery();
   const { data: comments = [] } = useGetCommentsQuery(activeTask?.id, { skip: !activeTask });
   const { data: members = [] } = useGetProjectMembersQuery(activeTask?.projectId, { skip: !activeTask?.projectId });
-  // Custom Columns & Workspace setup
   const { data: columns = [] } = useGetColumnsQuery(activeTask?.projectId, { skip: !activeTask?.projectId });
   const { data: workspaces = [] } = useGetWorkspacesQuery();
-  const activeWorkspace = workspaces[0]?.id; // Defaulting to the user's primary workspace
+  const activeWorkspace = workspaces[0]?.id;
 
-  // Custom Labels setup
   const { data: labelsData = [] } = useGetLabelsQuery(activeWorkspace, { skip: !activeWorkspace });
   const [addLabel] = useAddLabelMutation();
   const [addComment] = useAddCommentMutation();
@@ -76,12 +74,10 @@ export default function TaskDetailModal({
     setNewComment("");
   };
 
-  // Handle dynamic labels creation and selection
   const handleLabelChange = async (event, newValue) => {
     const processedLabels = await Promise.all(
       newValue.map(async (val) => {
         if (typeof val === "string") {
-          // User typed a new label, let's create it in the database
           const res = await addLabel({ name: val, workspaceId: activeWorkspace }).unwrap();
           return res[0].name;
         }
@@ -113,7 +109,7 @@ export default function TaskDetailModal({
                 getOptionLabel={(option) => option.name || ""}
                 value={projects.find((p) => p.id === activeTask.projectId) || null}
                 onChange={(_, newValue) => {
-                  setActiveTask({ ...activeTask, projectId: newValue?.id || "", columnId: "" }); // reset column when project changes
+                  setActiveTask({ ...activeTask, projectId: newValue?.id || "", columnId: "" });
                 }}
                 isOptionEqualToValue={(option, value) => option.id === value.id}
                 renderInput={(params) => <TextField {...params} label="Project" placeholder="Search projects..." />}

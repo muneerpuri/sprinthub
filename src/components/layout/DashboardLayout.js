@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import {
   Box, Drawer, AppBar, Toolbar, Typography, List, ListItem,
   ListItemIcon, ListItemText, IconButton, Avatar, useTheme,
@@ -9,15 +9,15 @@ import MenuIcon from "@mui/icons-material/Menu";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import FolderIcon from "@mui/icons-material/Folder";
-import BusinessIcon from "@mui/icons-material/Business"; // Added Workspaces Icon
-import SettingsIcon from "@mui/icons-material/Settings"; // Added Settings Icon
+import BusinessIcon from "@mui/icons-material/Business";
+import SettingsIcon from "@mui/icons-material/Settings";
 import LogoutIcon from "@mui/icons-material/Logout";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import { supabase } from "../../utils/supabase";
 import { useRouter, usePathname } from "next/navigation";
 import { ColorModeContext } from "../../app/ThemeContextProvider";
-import { useGetCurrentUserQuery, apiSlice } from "../../lib/apiSlice";
+import { useGetCurrentUserQuery, useSyncUserEmailMutation, apiSlice } from "../../lib/apiSlice";
 import { useDispatch } from "react-redux";
 import ErrorBoundary from "../error/ErrorBoundary";
 import ErrorFallbackUI from "../error/ErrorFallbackUI";
@@ -34,6 +34,23 @@ export default function DashboardLayout({ children }) {
   const dispatch = useDispatch();
 
   const { data: userData } = useGetCurrentUserQuery();
+  const [syncEmail] = useSyncUserEmailMutation();
+
+  useEffect(() => {
+    const syncIfNeeded = async () => {
+      if (!userData?.id) return;
+      const { data: sessionData } = await supabase.auth.getSession();
+      const authEmail = sessionData?.session?.user?.email;
+      if (authEmail && userData.email && authEmail !== userData.email) {
+        try {
+          await syncEmail({ id: userData.id }).unwrap();
+        } catch (err) {
+          console.error("Failed to sync email to DB:", err);
+        }
+      }
+    };
+    syncIfNeeded();
+  }, [userData, syncEmail]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -44,7 +61,6 @@ export default function DashboardLayout({ children }) {
   const handleAvatarClick = (event) => setAnchorEl(event.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
 
-  // ADDED WORKSPACES TO MENU
   const menuItems = [
     { title: "Dashboard", icon: <DashboardIcon />, path: "/" },
     { title: "Workspaces", icon: <BusinessIcon />, path: "/workspaces" },

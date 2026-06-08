@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
-import { Box, Fade, CircularProgress } from "@mui/material";
+import { Box, Fade, CircularProgress, IconButton, Typography } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { Kanban } from "react-kanban-kit";
 import TaskCard from "./TaskCard";
 
@@ -13,6 +14,7 @@ import TaskCard from "./TaskCard";
  * @property {Function} onTaskClick - Handler to view/edit task details.
  * @property {Function} onTaskDelete - Handler to delete a task.
  * @property {Function} onTaskStatusChange - Handler to directly change a task's status via dropdown/buttons.
+ * @property {Function} onColumnDelete - Handler to delete a column.
  */
 
 /**
@@ -31,6 +33,7 @@ export default function KanbanBoard({
   onColumnMove,
   onTaskDelete,
   onTaskStatusChange,
+  onColumnDelete,
 }) {
   const configMap = useMemo(
     () => ({
@@ -62,6 +65,45 @@ export default function KanbanBoard({
       },
     }),
     [tasks, onTaskClick, onTaskDelete, onTaskStatusChange],
+  );
+
+  const renderColumnHeader = useMemo(
+    () => (column) => (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          px: 2,
+          py: 1.5,
+        }}
+      >
+        <Typography variant="subtitle2" fontWeight="bold" noWrap>
+          {column.title}
+          <Typography
+            component="span"
+            variant="caption"
+            sx={{ ml: 1, color: "text.disabled" }}
+          >
+            {column.totalChildrenCount || column.children?.length || 0}
+          </Typography>
+        </Typography>
+        {onColumnDelete && (
+          <IconButton
+            size="small"
+            color="error"
+            onClick={(e) => {
+              e.stopPropagation();
+              onColumnDelete(column.id);
+            }}
+            sx={{ ml: 1 }}
+          >
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+        )}
+      </Box>
+    ),
+    [onColumnDelete],
   );
 
   if (isLoading || !board) {
@@ -96,7 +138,8 @@ export default function KanbanBoard({
           configMap={configMap}
           virtualization={false}
           onCardMove={onCardMove}
-          onColumnMove={onColumnMove} 
+          onColumnMove={onColumnMove}
+          renderColumnHeader={renderColumnHeader}
         />
       </Box>
     </Fade>

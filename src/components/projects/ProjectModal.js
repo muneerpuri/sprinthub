@@ -31,7 +31,6 @@ export default function ProjectModal({
     },
   });
 
-  // Auto-select first workspace if creating a new project
   useEffect(() => {
     if (open && !isEditing && workspaces.length > 0 && !formik.values.workspaceId) {
       formik.setFieldValue("workspaceId", workspaces[0].id);
@@ -59,7 +58,6 @@ export default function ProjectModal({
                 value={formik.values.workspaceId || ""}
                 label="Workspace"
                 onChange={formik.handleChange}
-                disabled={isEditing} // Usually, projects don't change workspaces after creation
               >
                 {workspaces.map((ws) => (
                   <MenuItem key={ws.id} value={ws.id}>{ws.name}</MenuItem>

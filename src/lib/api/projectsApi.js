@@ -102,6 +102,17 @@ export const projectsApi = baseApi.injectEndpoints({
     }),
     deleteProject: builder.mutation({
       queryFn: async (id) => {
+        const { count: activeTasks, error: countError } = await supabase
+          .from("tasks")
+          .select("*", { count: "exact", head: true })
+          .eq("projectId", id)
+          .is("deletedAt", null);
+
+        if (countError) return { error: countError };
+        if (activeTasks && activeTasks > 0) {
+          return { error: { message: `Cannot delete project with ${activeTasks} active task(s). Delete or reassign the tasks first.` } };
+        }
+
         const { error } = await supabase.from("projects").delete().eq("id", id);
         if (error) return { error };
         return { data: id };

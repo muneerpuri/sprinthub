@@ -6,11 +6,15 @@ export const workspacesApi = baseApi.injectEndpoints({
     getWorkspaces: builder.query({
       queryFn: async () => {
         const userId = await getOwnerId();
-        const { data, error } = await supabase
-          .from("workspace_members")
-          .select("workspaceId, role, workspaces(*)")
-          .eq("userId", userId)
-          .is("workspaces.deletedAt", null);
+       const { data, error } = await supabase
+  .from("workspace_members")
+  .select(`
+    workspaceId,
+    role,
+    workspaces!inner(*)
+  `)
+  .eq("userId", userId)
+  .is("workspaces.deletedAt", null);
         if (error) return { error };
         return { data: data.map((d) => ({ ...d.workspaces, role: d.role })) };
       },
@@ -30,6 +34,17 @@ export const workspacesApi = baseApi.injectEndpoints({
     // Add this right below addWorkspace
     deleteWorkspace: builder.mutation({
       queryFn: async (id) => {
+        // 🔥 Safe-delete check: verify no active projects exist in this workspace
+        const { count: activeProjects, error: countError } = await supabase
+          .from("projects")
+          .select("*", { count: "exact", head: true })
+          .eq("workspaceId", id);
+
+        if (countError) return { error: countError };
+        if (activeProjects && activeProjects > 0) {
+          return { error: { message: `Cannot delete workspace with ${activeProjects} active project(s). Delete or reassign the projects first.` } };
+        }
+
         const { data, error } = await supabase
           .from("workspaces")
           .update({ deletedAt: new Date().toISOString() })

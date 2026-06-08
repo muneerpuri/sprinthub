@@ -4,11 +4,13 @@ import { Box, Typography, Button, Grid, Card, CardContent, Dialog, DialogTitle, 
 import AddIcon from "@mui/icons-material/Add";
 import BusinessIcon from "@mui/icons-material/Business";
 import DashboardLayout from "../../components/layout/DashboardLayout";
-import { useGetWorkspacesQuery,useDeleteWorkspaceMutation, useAddWorkspaceMutation } from "../../lib/apiSlice";
+import { useGetWorkspacesQuery, useDeleteWorkspaceMutation, useAddWorkspaceMutation, apiSlice } from "../../lib/apiSlice";
+import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 export default function WorkspacesPage() {
+  const dispatch = useDispatch();
     const [deleteWorkspace] = useDeleteWorkspaceMutation();
   const { data: workspaces = [], isLoading } = useGetWorkspacesQuery();
   const [addWorkspace, { isLoading: isAdding }] = useAddWorkspaceMutation();
@@ -31,9 +33,17 @@ const handleDelete = async (id) => {
     if (confirm("Are you sure you want to delete this workspace?")) {
       try {
         await deleteWorkspace(id).unwrap();
+        dispatch(
+          apiSlice.util.updateQueryData("getWorkspaces", undefined, (draft) => {
+            const index = draft.findIndex((ws) => ws.id === id);
+            if (index !== -1) draft.splice(index, 1);
+          }),
+        );
+        dispatch(apiSlice.util.invalidateTags(["Workspace"]));
         toast.success("Workspace deleted!");
       } catch (err) {
-        toast.error("Failed to delete workspace.");
+        const message = err?.data?.message || err?.message || "Failed to delete workspace.";
+        toast.error(message);
       }
     }
   };
@@ -55,8 +65,12 @@ const handleDelete = async (id) => {
         <Typography>Loading workspaces...</Typography>
       ) : (
         <Grid container spacing={3}>
-          {workspaces.map((ws) => (
-            <Grid item="true" xs={12} sm={6} md={4} key={ws.id}>
+          {workspaces.map((ws, index) => (
+            <Grid item="true" key={`${ws?.id}-${index}`} size={{
+                xs: 12,
+                sm: 6,
+                md: 4
+            }}>
               <Card variant="outlined" sx={{ height: "100%" }}>
                <CardContent sx={{ display: "flex", alignItems: "center", gap: 2, justifyContent: "space-between" }}>
     <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>

@@ -57,8 +57,8 @@ export default function ProjectDetailsPage() {
   const [updateProject] = useUpdateProjectMutation();
   const [deleteProject] = useDeleteProjectMutation();
 
-  const isProjectOwner = project?.ownerId === currentUser;
-  const memberRecord = members.find((m) => m.userId === currentUser);
+  const isProjectOwner = project?.ownerId === currentUser?.id;
+  const memberRecord = members.find((m) => m.userId === currentUser?.id);
   const userRole = isProjectOwner ? "owner" : memberRecord?.role || "viewer";
 
   const canManageMembers = userRole === "owner";
@@ -85,6 +85,13 @@ export default function ProjectDetailsPage() {
   };
 
   const handleDeleteProject = async () => {
+    if (projectTasks.length > 0) {
+      toast.error(
+        `Cannot delete project with ${projectTasks.length} active task(s). Delete or reassign the tasks first.`,
+      );
+      return;
+    }
+
     if (
       window.confirm(
         "Are you sure you want to delete this project entirely? This cannot be undone.",
@@ -95,7 +102,8 @@ export default function ProjectDetailsPage() {
         toast.success("Project deleted");
         router.push("/projects");
       } catch (error) {
-        toast.error("Failed to delete project");
+        const message = error?.data?.message || error?.message || "Failed to delete project";
+        toast.error(message);
       }
     }
   };

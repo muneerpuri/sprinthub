@@ -30,7 +30,7 @@ export default function AuthGuard({ children }) {
       } = await supabase.auth.getSession();
       setSession(session);
       setLoading(false);
-      if (!session && pathname !== "/auth") {
+      if (!session && pathname !== "/auth" && pathname !== "/auth/callback") {
         router.push("/auth");
       }
     };
@@ -40,7 +40,7 @@ export default function AuthGuard({ children }) {
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setSession(session);
-        if (!session && pathname !== "/auth") {
+        if (!session && pathname !== "/auth" && pathname !== "/auth/callback") {
           router.push("/auth");
         }
       },
@@ -64,8 +64,7 @@ export default function AuthGuard({ children }) {
     );
   }
 
-  // If on auth page, just render it. Otherwise, only render children if authenticated.
-  if (!session && pathname !== "/auth") return null;
+  if (!session && pathname !== "/auth" && pathname !== "/auth/callback") return null;
 
   return children;
 }

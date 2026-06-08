@@ -15,7 +15,6 @@ export const getOwnerId = async () => {
 export const baseApi = createApi({
   reducerPath: "api",
   baseQuery: fakeBaseQuery(),
-  // ADDED ALL NEW TAG TYPES HERE:
   tagTypes: ["Task", "Project", "Comment", "ProjectMember", "User", "Workspace", "WorkspaceMember", "Label", "Column"],
   endpoints: () => ({}),
 });

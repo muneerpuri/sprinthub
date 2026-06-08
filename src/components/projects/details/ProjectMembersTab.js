@@ -21,7 +21,6 @@ export default function ProjectMembersTab({
   const [selectedUserId, setSelectedUserId] = useState("");
   const [inviteRole, setInviteRole] = useState("viewer");
 
-  // Filter out users who are already in the project
   const availableWorkspaceMembers = workspaceMembers.filter(
     (wm) => !members.some((m) => m.userId === wm.userId)
   );
@@ -30,7 +29,6 @@ export default function ProjectMembersTab({
     e.preventDefault();
     if (!selectedUserId) return;
     
-    // Find the email of the selected user to pass to your existing onInvite function
     const userToInvite = availableWorkspaceMembers.find(wm => wm.userId === selectedUserId);
     if (userToInvite) {
       await onInvite(userToInvite.users.email, inviteRole);

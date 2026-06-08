@@ -10,9 +10,10 @@ import {
   useAddTaskMutation, 
   useUpdateTaskMutation, 
   useDeleteTaskMutation,
-  useGetProjectMembersQuery, // <-- Added for Assignee Filter
+  useGetProjectMembersQuery,
   useAddColumnMutation,
-  useUpdateColumnMutation
+  useUpdateColumnMutation,
+  useDeleteColumnMutation
 } from "../../lib/apiSlice";
 
 import TaskHeader from "../../components/tasks/TaskHeader";
@@ -22,13 +23,12 @@ import KanbanBoard from "../../components/tasks/KanbanBoard";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import { buildKanbanBoard } from "../../components/tasks/kanbanUtils";
 
-// 🔥 FIX: Define stable empty arrays outside the component to prevent infinite re-renders
 const EMPTY_ARRAY = [];
 
 export default function TasksPage() {
   const [addColumn] = useAddColumnMutation();
   const [updateColumn] = useUpdateColumnMutation();
-  // Use EMPTY_ARRAY as the fallback instead of inline []
+  const [deleteColumn] = useDeleteColumnMutation();
   const { data: projects = EMPTY_ARRAY } = useGetProjectsListQuery();
   const [selectedProjectId, setSelectedProjectId] = useState("");
 
@@ -36,11 +36,9 @@ export default function TasksPage() {
     if (projects.length > 0 && !selectedProjectId) setSelectedProjectId(projects[0].id);
   }, [projects, selectedProjectId]);
 
-  // Use EMPTY_ARRAY for tasks and columns
   const { data: tasks = EMPTY_ARRAY, isLoading: tasksLoading } = useGetTasksQuery(selectedProjectId, { skip: !selectedProjectId });
   const { data: columns = EMPTY_ARRAY, isLoading: colsLoading } = useGetColumnsQuery(selectedProjectId, { skip: !selectedProjectId });
   
-  // Fetch members for Assignee filter
   const { data: members = EMPTY_ARRAY } = useGetProjectMembersQuery(selectedProjectId, { skip: !selectedProjectId });
 
   const [addTask] = useAddTaskMutation();
@@ -52,10 +50,9 @@ export default function TasksPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [activeTask, setActiveTask] = useState(null);
 
-  // Filtering State
   const [search, setSearch] = useState("");
   const [filterPriority, setFilterPriority] = useState("");
-  const [filterAssignee, setFilterAssignee] = useState(""); // <-- Added Assignee state
+  const [filterAssignee, setFilterAssignee] = useState(""); 
 
   const filteredTasks = useMemo(() => {
     return tasks.filter(t => {
@@ -91,7 +88,7 @@ export default function TasksPage() {
       await addColumn({
         projectId: selectedProjectId,
         name: columnName,
-        order: columns.length, // Put it at the end
+        order: columns.length, 
       }).unwrap();
       toast.success("Column added!");
     } catch (err) {
@@ -100,12 +97,9 @@ export default function TasksPage() {
   };
 
   const handleColumnMove = async (move) => {
-    // move object contains { columnId, fromIndex, toIndex } from the library
     const { columnId, fromIndex, toIndex } = move;
     const movedColId = columnId || move.laneId || move.id;
 
-    // 🔥 Optimistically reorder columns in the local board state so the UI
-    //    reflects the new order instantly instead of snapping back.
     if (board && fromIndex !== undefined && toIndex !== undefined && movedColId) {
       const updatedBoard = {
         ...board,
@@ -114,9 +108,7 @@ export default function TasksPage() {
           children: [...board.root.children],
         },
       };
-      // Remove the column from its original position
       const [removed] = updatedBoard.root.children.splice(fromIndex, 1);
-      // Insert it at the new position
       updatedBoard.root.children.splice(toIndex, 0, removed);
       setBoard(updatedBoard);
     }
@@ -158,6 +150,17 @@ export default function TasksPage() {
 
     try { await updateTask({ id: move.cardId, columnId: targetColumnId }).unwrap(); }
     catch (err) { toast.error("Failed to move task"); }
+  };
+
+  const handleColumnDelete = async (columnId) => {
+    try {
+      await deleteColumn(columnId).unwrap();
+      toast.success("Column deleted");
+      setBoardKey(prev => prev + 1);
+    } catch (err) {
+      const message = err?.data?.message || err?.message || "Failed to delete column";
+      toast.error(message);
+    }
   };
 
   return (
@@ -212,6 +215,7 @@ export default function TasksPage() {
             onTaskClick={setActiveTask}
             onTaskDelete={handleDeleteTask}
             onTaskStatusChange={(taskId, colId) => updateTask({ id: taskId, columnId: colId })}
+            onColumnDelete={handleColumnDelete}
           />
 
         </Box>

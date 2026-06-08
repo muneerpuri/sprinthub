@@ -5,7 +5,6 @@ export const buildKanbanBoard = (tasksData, columnsData) => {
     root: { id: "root", type: "board", children: columnsData.map(c => c.id) },
   };
 
-  // Build lanes based on dynamic columns
   columnsData.forEach((col) => {
     const colTasks = tasksData.filter(t => t.columnId === col.id);
     data[col.id] = {
@@ -18,13 +17,12 @@ export const buildKanbanBoard = (tasksData, columnsData) => {
     };
   });
 
-  // Map tasks
   tasksData.forEach((t) => {
     data[String(t.id)] = {
       id: String(t.id),
       type: "card",
       title: t.title,
-      parentId: t.columnId || columnsData[0].id, // fallback
+      parentId: t.columnId || columnsData[0].id,
       task: t,
     };
   });

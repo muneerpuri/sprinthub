@@ -25,12 +25,10 @@ class ErrorBoundary extends React.Component {
   componentDidCatch(error, errorInfo) {
     this.setState({ errorInfo });
 
-    // Log to console in development
     if (process.env.NODE_ENV === "development") {
       console.error("[ErrorBoundary] Caught error:", error, errorInfo);
     }
 
-    // Call optional onError callback
     if (this.props.onError) {
       this.props.onError(error, errorInfo);
     }
@@ -54,7 +52,6 @@ class ErrorBoundary extends React.Component {
         );
       }
 
-      // Default minimal fallback (used when MUI might not be available)
       return <DefaultFallback error={this.state.error} resetError={this.resetError} />;
     }
 

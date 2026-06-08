@@ -7,7 +7,6 @@ getTasks: builder.query({
       queryFn: async (projectId) => {
         let query = supabase
           .from("tasks")
-          // 🔥 FIX: Use the column name (!assigneeId) as the hint instead of the constraint name
           .select("*, assignee:users!assigneeId(firstName, lastName, email)")
           .is("deletedAt", null)
           .order("createdAt", { ascending: false });

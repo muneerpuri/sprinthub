@@ -16,25 +16,25 @@ function VerifyEmailLogic() {
 
   useEffect(() => {
     const handleEmailVerify = async () => {
-      const token_hash = searchParams.get("code"); // Note: Supabase sometimes uses 'code' for PKCE
-      const type = searchParams.get("type") || "signup"; // Fallback to signup
+      const code = searchParams.get("code");
+      const type = searchParams.get("type") || "";
 
-      if (token_hash) {
-        // If using PKCE Flow (Standard for Next.js App Router)
-        const { error } = await supabase.auth.verifyOtp({ token_hash, type });
-        // OR if using standard code exchange: await supabase.auth.exchangeCodeForSession(token_hash);
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
 
         if (error) {
           console.error("Verification error:", error.message);
           router.push("/auth?error=verification_failed");
           return;
         }
-        router.push("/tasks");
-      } else  {
-        const {
-          data: { session },
-          error,
-        } = await supabase.auth.getSession();
+
+        if (type === "email_change") {
+          router.push("/settings/profile");
+        } else {
+          router.push("/tasks");
+        }
+      } else {
+        const { data: { session } } = await supabase.auth.getSession();
 
         if (session) {
           router.push("/tasks");

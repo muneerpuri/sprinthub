@@ -17,7 +17,7 @@ const validationSchema = yup.object({
 
 export default function CreateTaskModal({ open, onClose, onCreate, projectId }) {
   const { data: workspaces = [] } = useGetWorkspacesQuery();
-  const activeWorkspace = workspaces[0]?.id; // Simplification: auto-select first workspace
+  const activeWorkspace = workspaces[0]?.id;
     const { data: members = [] } = useGetProjectMembersQuery(projectId, { skip: !projectId });
   const { data: labelsData = [] } = useGetLabelsQuery(activeWorkspace, { skip: !activeWorkspace });
   const [addLabel] = useAddLabelMutation();
@@ -31,7 +31,6 @@ export default function CreateTaskModal({ open, onClose, onCreate, projectId }) 
   const handleLabelChange = async (event, newValue) => {
     const processedLabels = await Promise.all(newValue.map(async (val) => {
       if (typeof val === 'string') {
-        // User typed a new label
         const res = await addLabel({ name: val, workspaceId: activeWorkspace }).unwrap();
         return res[0].name;
       }

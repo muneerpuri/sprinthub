@@ -1,16 +1,17 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Box, Typography, TextField, Button, Paper } from "@mui/material";
+import { Box, Typography, TextField, Button, Paper, Alert } from "@mui/material";
 import { toast } from "react-toastify";
 import DashboardLayout from "../../../components/layout/DashboardLayout";
 import { useGetCurrentUserQuery, useUpdateUserProfileMutation } from "../../../lib/apiSlice";
-import { supabase } from "../../../utils/supabase"; // <-- ADD IMPORT
+import { supabase } from "../../../utils/supabase";
 
 export default function ProfileSettingsPage() {
   const { data: user, isLoading } = useGetCurrentUserQuery();
   const [updateProfile, { isLoading: isUpdating }] = useUpdateUserProfileMutation();
 
   const [form, setForm] = useState({ firstName: "", lastName: "", email: "", password: "" });
+  const [pendingEmail, setPendingEmail] = useState(null); 
 
   useEffect(() => {
     if (user) {
@@ -23,25 +24,35 @@ export default function ProfileSettingsPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // 1. Update Profile in your public.users table
       await updateProfile({ id: user.id, firstName: form.firstName, lastName: form.lastName }).unwrap();
 
-      // 2. Update Auth in Supabase if Email or Password changed
       const authUpdates = {};
-      if (form.email !== user.email) authUpdates.email = form.email;
+      const emailChanged = form.email !== user.email;
+      if (emailChanged) authUpdates.email = form.email;
       if (form.password) authUpdates.password = form.password;
 
       if (Object.keys(authUpdates).length > 0) {
-        const { error: authError } = await supabase.auth.updateUser(authUpdates);
+        const options = emailChanged
+          ? { emailRedirectTo: `${window.location.origin}/auth/callback` }
+          : undefined;
+        const { error: authError } = await supabase.auth.updateUser(authUpdates, options);
         if (authError) throw authError;
 
-        if (authUpdates.email) {
-          toast.info("A verification link has been sent to your new email.");
+        if (emailChanged) {
+          setPendingEmail(form.email);
+          toast.info(
+            `A verification link has been sent to ${form.email}. Please check your inbox and click the link to confirm your new email.`,
+            { autoClose: 10000 },
+          );
         }
+        if (form.password) {
+          toast.success("Password updated successfully!");
+        }
+      } else {
+        toast.success("Profile updated successfully!");
       }
 
-      toast.success("Profile updated successfully!");
-      setForm((prev) => ({ ...prev, password: "" })); // Clear password field
+      setForm((prev) => ({ ...prev, password: "" })); 
     } catch (err) {
       toast.error(err.message || "Failed to update profile");
     }
@@ -52,6 +63,12 @@ export default function ProfileSettingsPage() {
         <Typography variant="h4" fontWeight="bold" mb={3}>Account Settings</Typography>
         {isLoading ? <Typography>Loading...</Typography> : (
           <Paper variant="outlined" sx={{ p: 4 }}>
+            {pendingEmail && (
+              <Alert severity="info" sx={{ mb: 3 }}>
+                Email change pending — verification link sent to <strong>{pendingEmail}</strong>.
+                Please check your inbox and click the link to confirm.
+              </Alert>
+            )}
             <form onSubmit={handleSubmit}>
               <Box display="flex" gap={2} mb={3}>
                 <TextField fullWidth label="First Name" name="firstName" value={form.firstName} onChange={handleChange} required />
