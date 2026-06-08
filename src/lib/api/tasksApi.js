@@ -1,18 +1,20 @@
 import { baseApi, getOwnerId } from "./baseApi";
 import { supabase } from "../../utils/supabase";
 
-/**
- * Injects task-related endpoints into the base API.
- */
 export const tasksApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getTasks: builder.query({
-      queryFn: async () => {
-        const { data, error } = await supabase
+getTasks: builder.query({
+      queryFn: async (projectId) => {
+        let query = supabase
           .from("tasks")
-          .select("*")
+          // 🔥 FIX: Use the column name (!assigneeId) as the hint instead of the constraint name
+          .select("*, assignee:users!assigneeId(firstName, lastName, email)")
           .is("deletedAt", null)
           .order("createdAt", { ascending: false });
+          
+        if (projectId) query = query.eq("projectId", projectId);
+        
+        const { data, error } = await query;
         if (error) return { error };
         return { data };
       },
@@ -21,10 +23,7 @@ export const tasksApi = baseApi.injectEndpoints({
     addTask: builder.mutation({
       queryFn: async (payload) => {
         const ownerId = await getOwnerId();
-        const { data, error } = await supabase
-          .from("tasks")
-          .insert([{ ...payload, ownerId }])
-          .select();
+        const { data, error } = await supabase.from("tasks").insert([{ ...payload, ownerId }]).select();
         if (error) return { error };
         return { data };
       },
@@ -32,11 +31,7 @@ export const tasksApi = baseApi.injectEndpoints({
     }),
     updateTask: builder.mutation({
       queryFn: async ({ id, ...payload }) => {
-        const { data, error } = await supabase
-          .from("tasks")
-          .update(payload)
-          .eq("id", id)
-          .select();
+        const { data, error } = await supabase.from("tasks").update(payload).eq("id", id).select();
         if (error) return { error };
         return { data };
       },
@@ -44,10 +39,7 @@ export const tasksApi = baseApi.injectEndpoints({
     }),
     deleteTask: builder.mutation({
       queryFn: async (id) => {
-        const { error } = await supabase
-          .from("tasks")
-          .update({ deletedAt: new Date().toISOString() })
-          .eq("id", id);
+        const { error } = await supabase.from("tasks").update({ deletedAt: new Date().toISOString() }).eq("id", id);
         if (error) return { error };
         return { data: id };
       },
@@ -56,9 +48,4 @@ export const tasksApi = baseApi.injectEndpoints({
   }),
 });
 
-export const {
-  useGetTasksQuery,
-  useAddTaskMutation,
-  useUpdateTaskMutation,
-  useDeleteTaskMutation,
-} = tasksApi;
+export const { useGetTasksQuery, useAddTaskMutation, useUpdateTaskMutation, useDeleteTaskMutation } = tasksApi;

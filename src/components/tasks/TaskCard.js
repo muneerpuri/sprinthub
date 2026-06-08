@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import {
   Card,
   CardContent,
@@ -8,82 +8,25 @@ import {
   Chip,
   IconButton,
   Avatar,
-  Menu,
-  MenuItem,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
 
-/**
- * @typedef {Object} Task
- * @property {string} id - The unique identifier of the task.
- * @property {string} title - The title of the task.
- * @property {string} [description] - The description of the task.
- * @property {string} status - The current status of the task (e.g., "PENDING", "IN_PROGRESS", "COMPLETED").
- * @property {string} [priority] - The priority of the task (e.g., "high", "medium", "low").
- * @property {number} [storyPoints] - The story points assigned to the task.
- * @property {string} [dueDate] - The due date of the task in ISO format.
- * @property {string[]} [labels] - An array of labels for the task.
- * @property {string} [ownerId] - The ID of the user who owns the task.
- */
-
-/**
- * @typedef {Object} TaskCardProps
- * @property {Task} task - The task object to display.
- * @property {(task: Task) => void} onClick - Callback function when the card is clicked.
- * @property {(task: Task) => void} onDelete - Callback function when the delete button is clicked.
- * @property {(status: string) => void} onMove - Callback function when the task is moved to a different status.
- */
-
-/**
- * TaskCard component displays a single task with its details, priority, due date, and actions.
- *
- * @param {TaskCardProps} props - The component props.
- * @returns {JSX.Element|null} The TaskCard component or null if no task is provided.
- */
-export default function TaskCard({ task, onClick, onDelete, onMove }) {
-  const [anchorEl, setAnchorEl] = useState(null);
-  const openMenu = Boolean(anchorEl);
-
+export default function TaskCard({ task, onClick, onDelete }) {
   if (!task) return null;
-
-  const handleMenuClick = (event) => {
-    event.stopPropagation();
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = (event) => {
-    if (event) event.stopPropagation();
-    setAnchorEl(null);
-  };
-
-  const handleMoveTask = (status, event) => {
-    event.stopPropagation();
-    onMove(status);
-    setAnchorEl(null);
-  };
 
   const getPriorityColor = (priority) => {
     switch (priority) {
-      case "high":
-        return "error";
-      case "medium":
-        return "warning";
-      case "low":
-        return "success";
-      default:
-        return "default";
+      case "high": return "error";
+      case "medium": return "warning";
+      case "low": return "success";
+      default: return "default";
     }
   };
 
-  // Format Due Date cleanly
   const formattedDate = task.dueDate
-    ? new Date(task.dueDate).toLocaleDateString(undefined, {
-        month: "short",
-        day: "numeric",
-      })
+    ? new Date(task.dueDate).toLocaleDateString(undefined, { month: "short", day: "numeric" })
     : null;
 
   return (
@@ -97,7 +40,6 @@ export default function TaskCard({ task, onClick, onDelete, onMove }) {
         border: "1px solid",
         borderColor: "divider",
         bgcolor: "background.paper",
-
         "&:hover": {
           borderColor: "primary.main",
           boxShadow: "0 12px 24px -4px rgba(99, 102, 241, 0.15)",
@@ -114,70 +56,17 @@ export default function TaskCard({ task, onClick, onDelete, onMove }) {
                 key={lbl}
                 label={lbl}
                 size="small"
-                sx={{
-                  height: 20,
-                  fontSize: "0.65rem",
-                  bgcolor: "action.hover",
-                }}
+                sx={{ height: 20, fontSize: "0.65rem", bgcolor: "action.hover" }}
               />
             ))}
           </Box>
         )}
 
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-          }}
-        >
-          <Typography
-            variant="subtitle2"
-            fontWeight="700"
-            sx={{ mb: 1, pr: 2 }}
-          >
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+          <Typography variant="subtitle2" fontWeight="700" sx={{ mb: 1, pr: 2 }}>
             {task.title}
           </Typography>
           <Box sx={{ display: "flex", alignItems: "center", mt: -0.5, mr: -1 }}>
-            {onMove && (
-              <>
-                <IconButton
-                  size="small"
-                  onClick={handleMenuClick}
-                  title="Move Task"
-                >
-                  <MoreVertIcon fontSize="small" />
-                </IconButton>
-                <Menu
-                  anchorEl={anchorEl}
-                  open={openMenu}
-                  onClose={handleMenuClose}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <MenuItem
-                    disabled
-                    sx={{ fontSize: "0.75rem", fontWeight: "bold" }}
-                  >
-                    Move to:
-                  </MenuItem>
-                  {task.status !== "PENDING" && (
-                    <MenuItem onClick={(e) => handleMoveTask("PENDING", e)}>
-                      To Do
-                    </MenuItem>
-                  )}
-                  {task.status !== "IN_PROGRESS" && (
-                    <MenuItem onClick={(e) => handleMoveTask("IN_PROGRESS", e)}>
-                      In Progress
-                    </MenuItem>
-                  )}
-                  {task.status !== "COMPLETED" && (
-                    <MenuItem onClick={(e) => handleMoveTask("COMPLETED", e)}>
-                      Done
-                    </MenuItem>
-                  )}
-                </Menu>
-              </>
-            )}
             <IconButton
               size="small"
               color="error"
@@ -191,35 +80,19 @@ export default function TaskCard({ task, onClick, onDelete, onMove }) {
           </Box>
         </Box>
 
-        {/* Footer info: priority, pts, date, assignee */}
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mt: 2,
-          }}
-        >
+        {/* Footer info */}
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 2 }}>
           <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
             {task.priority && (
               <Chip
                 label={task.priority}
                 size="small"
                 color={getPriorityColor(task.priority)}
-                sx={{
-                  height: 20,
-                  fontSize: "0.65rem",
-                  fontWeight: "bold",
-                  textTransform: "uppercase",
-                }}
+                sx={{ height: 20, fontSize: "0.65rem", fontWeight: "bold", textTransform: "uppercase" }}
               />
             )}
             {task.storyPoints && (
-              <Typography
-                variant="caption"
-                fontWeight="bold"
-                color="text.secondary"
-              >
+              <Typography variant="caption" fontWeight="bold" color="text.secondary">
                 {task.storyPoints} pt
               </Typography>
             )}
@@ -227,37 +100,18 @@ export default function TaskCard({ task, onClick, onDelete, onMove }) {
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             {formattedDate && (
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 0.5,
-                  color: "text.secondary",
-                }}
-              >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "text.secondary" }}>
                 <CalendarTodayIcon sx={{ fontSize: 14 }} />
-                <Typography variant="caption" fontWeight="500">
-                  {formattedDate}
-                </Typography>
+                <Typography variant="caption" fontWeight="500">{formattedDate}</Typography>
               </Box>
             )}
-            {/* Show Assignee / Owner Avatar */}
-            {task.ownerId ? (
-              <Avatar
-                sx={{
-                  width: 22,
-                  height: 22,
-                  fontSize: 10,
-                  bgcolor: "primary.main",
-                }}
-              >
-                U
-              </Avatar>
-            ) : (
-              <AccountCircleIcon
-                sx={{ fontSize: 22, color: "text.disabled" }}
-              />
-            )}
+           {task.assignee ? (
+  <Avatar sx={{ width: 24, height: 24, fontSize: 11, bgcolor: "primary.main" }} title={`${task.assignee.firstName} ${task.assignee.lastName}`}>
+    {task.assignee.firstName?.charAt(0)}{task.assignee.lastName?.charAt(0)}
+  </Avatar>
+) : (
+  <AccountCircleIcon sx={{ fontSize: 24, color: "text.disabled" }} title="Unassigned" />
+)}
           </Box>
         </Box>
       </CardContent>

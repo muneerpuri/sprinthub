@@ -1,60 +1,27 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { useFormik } from "formik";
 import * as yup from "yup";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Box,
-  FormControlLabel,
-  Switch,
+  Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField,
+  FormControl, InputLabel, Select, MenuItem, Box, FormControlLabel, Switch
 } from "@mui/material";
+import { useGetWorkspacesQuery } from "../../lib/apiSlice";
 
 const validationSchema = yup.object({
-  name: yup
-    .string()
-    .required("Project name is required")
-    .test(
-      "not-only-whitespace",
-      "Project name cannot be empty or only spaces",
-      (val) => val && val.trim().length > 0,
-    ),
+  name: yup.string().required("Project name is required").trim(),
+  workspaceId: yup.string().required("Workspace is required"),
   description: yup.string().nullable(),
   color: yup.string().nullable(),
   isArchived: yup.boolean(),
 });
 
-/**
- * @typedef {Object} ProjectModalProps
- * @property {boolean} open - Whether the modal is open.
- * @property {function(): void} onClose - Callback function to close the modal.
- * @property {function(Object): void} onSave - Callback function to save the project with validated form values.
- * @property {boolean} isEditing - Whether the modal is in editing mode.
- * @property {Object} [initialValues] - Initial form values for editing.
- */
-
-/**
- * ProjectModal component for creating or editing project details.
- * Uses Formik for form state management and Yup for validation.
- *
- * @param {ProjectModalProps} props - The component props.
- * @returns {JSX.Element} The ProjectModal component.
- */
 export default function ProjectModal({
-  open,
-  onClose,
-  onSave,
-  isEditing,
-  initialValues = { name: "", description: "", color: "#3b82f6", isArchived: false },
+  open, onClose, onSave, isEditing,
+  initialValues = { name: "", workspaceId: "", description: "", color: "#3b82f6", isArchived: false },
 }) {
+  const { data: workspaces = [] } = useGetWorkspacesQuery();
+
   const formik = useFormik({
     initialValues,
     validationSchema,
@@ -63,6 +30,13 @@ export default function ProjectModal({
       onSave({ ...values, name: values.name.trim() });
     },
   });
+
+  // Auto-select first workspace if creating a new project
+  useEffect(() => {
+    if (open && !isEditing && workspaces.length > 0 && !formik.values.workspaceId) {
+      formik.setFieldValue("workspaceId", workspaces[0].id);
+    }
+  }, [open, workspaces, isEditing, formik]);
 
   const handleClose = () => {
     formik.resetForm();
@@ -77,38 +51,37 @@ export default function ProjectModal({
       <form onSubmit={formik.handleSubmit}>
         <DialogContent dividers>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, pt: 1 }}>
+            
+            <FormControl fullWidth required error={formik.touched.workspaceId && Boolean(formik.errors.workspaceId)}>
+              <InputLabel>Workspace</InputLabel>
+              <Select
+                name="workspaceId"
+                value={formik.values.workspaceId || ""}
+                label="Workspace"
+                onChange={formik.handleChange}
+                disabled={isEditing} // Usually, projects don't change workspaces after creation
+              >
+                {workspaces.map((ws) => (
+                  <MenuItem key={ws.id} value={ws.id}>{ws.name}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
             <TextField
-              label="Project Name"
-              name="name"
-              value={formik.values.name}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              fullWidth
-              required
-              placeholder="e.g., Marketing Website Redesign"
+              label="Project Name" name="name" value={formik.values.name}
+              onChange={formik.handleChange} onBlur={formik.handleBlur} fullWidth required
               error={formik.touched.name && Boolean(formik.errors.name)}
               helperText={formik.touched.name && formik.errors.name}
             />
 
             <TextField
-              label="Description"
-              name="description"
-              value={formik.values.description || ""}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              fullWidth
-              multiline
-              rows={3}
+              label="Description" name="description" value={formik.values.description || ""}
+              onChange={formik.handleChange} onBlur={formik.handleBlur} fullWidth multiline rows={3}
             />
 
             <FormControl fullWidth>
               <InputLabel>Project Theme Color</InputLabel>
-              <Select
-                name="color"
-                value={formik.values.color || "#3b82f6"}
-                label="Project Theme Color"
-                onChange={formik.handleChange}
-              >
+              <Select name="color" value={formik.values.color || "#3b82f6"} label="Project Theme Color" onChange={formik.handleChange}>
                 <MenuItem value="#3b82f6">Blue</MenuItem>
                 <MenuItem value="#10b981">Green</MenuItem>
                 <MenuItem value="#8b5cf6">Purple</MenuItem>
@@ -119,29 +92,15 @@ export default function ProjectModal({
 
             {isEditing && (
               <FormControlLabel
-                control={
-                  <Switch
-                    checked={formik.values.isArchived || false}
-                    onChange={formik.handleChange}
-                    name="isArchived"
-                    color="primary"
-                  />
-                }
+                control={<Switch checked={formik.values.isArchived || false} onChange={formik.handleChange} name="isArchived" color="primary" />}
                 label="Archive this project"
               />
             )}
           </Box>
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
-          <Button onClick={handleClose} color="inherit">
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            disabled={!formik.dirty || !formik.isValid}
-          >
+          <Button onClick={handleClose} color="inherit">Cancel</Button>
+          <Button type="submit" variant="contained" color="primary" disabled={!formik.dirty || !formik.isValid}>
             {isEditing ? "Save Changes" : "Create Project"}
           </Button>
         </DialogActions>
@@ -149,4 +108,3 @@ export default function ProjectModal({
     </Dialog>
   );
 }
-

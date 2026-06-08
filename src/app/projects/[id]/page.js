@@ -29,6 +29,7 @@ import {
   useGetTasksQuery,
   useUpdateProjectMutation,
   useDeleteProjectMutation,
+  useGetWorkspaceMembersQuery
 } from "../../../lib/apiSlice";
 
 /**
@@ -42,10 +43,9 @@ export default function ProjectDetailsPage() {
 
   const [currentTab, setCurrentTab] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
-
+  const { data: project, isLoading: isProjectLoading } = useGetProjectByIdQuery(projectId);
   const { data: currentUser } = useGetCurrentUserQuery();
-  const { data: project, isLoading: isProjectLoading } =
-    useGetProjectByIdQuery(projectId);
+
   const { data: members = [], isLoading: isMembersLoading } =
     useGetProjectMembersQuery(projectId);
   const { data: allTasks = [], isLoading: tasksLoading } = useGetTasksQuery();
@@ -70,6 +70,9 @@ export default function ProjectDetailsPage() {
   const handleOpenEdit = () => {
     setModalOpen(true);
   };
+  const { data: workspaceMembers = [] } = useGetWorkspaceMembersQuery(project?.workspaceId, {
+    skip: !project?.workspaceId,
+  });
 
   const handleSaveProject = async (values) => {
     try {
@@ -183,9 +186,10 @@ export default function ProjectDetailsPage() {
         />
       )}
 
-      {currentTab === 1 && (
+  {currentTab === 1 && (
         <ProjectMembersTab
           members={members}
+          workspaceMembers={workspaceMembers}
           isLoading={isMembersLoading}
           canManage={canManageMembers}
           ownerId={project?.ownerId}

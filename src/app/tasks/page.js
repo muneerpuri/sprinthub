@@ -1,14 +1,18 @@
 "use client";
-
-import React, { useEffect, useState } from "react";
-import { Box } from "@mui/material";
+import React, { useEffect, useState, useMemo } from "react";
+import { Box, MenuItem, Select, FormControl, InputLabel, TextField, Button } from "@mui/material";
 import { dropHandler } from "react-kanban-kit";
 import { toast } from "react-toastify";
 import {
-  useGetTasksQuery,
-  useAddTaskMutation,
-  useUpdateTaskMutation,
+  useGetTasksQuery, 
+  useGetColumnsQuery, 
+  useGetProjectsListQuery,
+  useAddTaskMutation, 
+  useUpdateTaskMutation, 
   useDeleteTaskMutation,
+  useGetProjectMembersQuery, // <-- Added for Assignee Filter
+  useAddColumnMutation,
+  useUpdateColumnMutation
 } from "../../lib/apiSlice";
 
 import TaskHeader from "../../components/tasks/TaskHeader";
@@ -16,21 +20,28 @@ import CreateTaskModal from "../../components/tasks/CreateTaskModal";
 import TaskDetailModal from "../../components/tasks/TaskDetailModal";
 import KanbanBoard from "../../components/tasks/KanbanBoard";
 import DashboardLayout from "../../components/layout/DashboardLayout";
-import {
-  buildKanbanBoard,
-  COLUMN_STATUS_MAP,
-} from "../../components/tasks/kanbanUtils";
+import { buildKanbanBoard } from "../../components/tasks/kanbanUtils";
 
+// 🔥 FIX: Define stable empty arrays outside the component to prevent infinite re-renders
 const EMPTY_ARRAY = [];
 
-/**
- * Primary Tasks page coordinating Kanban board state and Redux API updates.
- *
- * @returns {JSX.Element}
- */
 export default function TasksPage() {
-  const { data: tasksData, isLoading } = useGetTasksQuery();
-  const tasks = tasksData || EMPTY_ARRAY;
+  const [addColumn] = useAddColumnMutation();
+  const [updateColumn] = useUpdateColumnMutation();
+  // Use EMPTY_ARRAY as the fallback instead of inline []
+  const { data: projects = EMPTY_ARRAY } = useGetProjectsListQuery();
+  const [selectedProjectId, setSelectedProjectId] = useState("");
+
+  useEffect(() => {
+    if (projects.length > 0 && !selectedProjectId) setSelectedProjectId(projects[0].id);
+  }, [projects, selectedProjectId]);
+
+  // Use EMPTY_ARRAY for tasks and columns
+  const { data: tasks = EMPTY_ARRAY, isLoading: tasksLoading } = useGetTasksQuery(selectedProjectId, { skip: !selectedProjectId });
+  const { data: columns = EMPTY_ARRAY, isLoading: colsLoading } = useGetColumnsQuery(selectedProjectId, { skip: !selectedProjectId });
+  
+  // Fetch members for Assignee filter
+  const { data: members = EMPTY_ARRAY } = useGetProjectMembersQuery(selectedProjectId, { skip: !selectedProjectId });
 
   const [addTask] = useAddTaskMutation();
   const [updateTask] = useUpdateTaskMutation();
@@ -38,126 +49,171 @@ export default function TasksPage() {
 
   const [board, setBoard] = useState(null);
   const [boardKey, setBoardKey] = useState(0);
-
   const [createOpen, setCreateOpen] = useState(false);
   const [activeTask, setActiveTask] = useState(null);
 
-  useEffect(() => {
-    if (tasksData) {
-      setBoard(buildKanbanBoard(tasksData));
-    }
-  }, [tasksData]);
+  // Filtering State
+  const [search, setSearch] = useState("");
+  const [filterPriority, setFilterPriority] = useState("");
+  const [filterAssignee, setFilterAssignee] = useState(""); // <-- Added Assignee state
+
+  const filteredTasks = useMemo(() => {
+    return tasks.filter(t => {
+      const matchSearch = t.title.toLowerCase().includes(search.toLowerCase()) || (t.description || "").toLowerCase().includes(search.toLowerCase());
+      const matchPriority = filterPriority ? t.priority === filterPriority : true;
+      const matchAssignee = filterAssignee ? t.assigneeId === filterAssignee : true;
+      return matchSearch && matchPriority && matchAssignee;
+    });
+  }, [tasks, search, filterPriority, filterAssignee]);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      import("drag-drop-touch");
+    if (columns.length > 0) {
+      setBoard(buildKanbanBoard(filteredTasks, columns));
     }
-  }, []);
+  }, [filteredTasks, columns]);
+
+  useEffect(() => { if (typeof window !== "undefined") import("drag-drop-touch"); }, []);
 
   const handleCreate = async (values) => {
     try {
-      await addTask({ ...values, status: "PENDING" }).unwrap();
+      await addTask({ ...values, projectId: selectedProjectId, columnId: columns[0].id }).unwrap();
       toast.success("Task created ✨");
       setCreateOpen(false);
+    } catch (err) { toast.error("Create failed"); }
+  };
+  const handleAddColumn = async () => {
+    if (!selectedProjectId) return;
+    
+    const columnName = prompt("Enter new column name:");
+    if (!columnName) return;
+
+    try {
+      await addColumn({
+        projectId: selectedProjectId,
+        name: columnName,
+        order: columns.length, // Put it at the end
+      }).unwrap();
+      toast.success("Column added!");
     } catch (err) {
-      toast.error("Create failed");
+      toast.error("Failed to add column");
+    }
+  };
+
+   const handleColumnMove = async (move) => {
+    // move object usually contains { laneId, sourceIndex, destinationIndex }
+    try {
+      await updateColumn({
+        id: move.laneId || move.id,
+        order: move.destinationIndex
+      }).unwrap();
+      // Note: In a production app, you might need to update the `order` of ALL columns 
+      // between the sourceIndex and destinationIndex.
+    } catch (err) {
+      toast.error("Failed to reorder column");
     }
   };
 
   const handleUpdateTask = async () => {
     if (!activeTask) return;
     try {
+      delete activeTask?.assignee
       await updateTask({ id: activeTask.id, ...activeTask }).unwrap();
       toast.success("Task updated");
       setActiveTask(null);
-    } catch (err) {
-      toast.error("Update failed");
-    }
+    } catch (err) { toast.error("Update failed"); }
   };
 
   const handleDeleteTask = async (task) => {
-    if (!task?.id) return;
     try {
       await deleteTask(task.id).unwrap();
       toast.success("Task deleted");
-
       if (activeTask?.id === task.id) setActiveTask(null);
-      setBoardKey((prev) => prev + 1);
-    } catch (err) {
-      toast.error("Delete failed");
-    }
+      setBoardKey(prev => prev + 1);
+    } catch (err) { toast.error("Delete failed"); }
   };
 
   const handleCardMove = async (move) => {
-    const newStatus = COLUMN_STATUS_MAP[move.toColumnId];
+    const targetColumnId = move.toColumnId;
     const updatedBoard = dropHandler(move, board);
-
-    if (updatedBoard[move.cardId]) {
-      updatedBoard[move.cardId].parentId = move.toColumnId;
-    }
+    if (updatedBoard[move.cardId]) updatedBoard[move.cardId].parentId = targetColumnId;
     setBoard(updatedBoard);
 
-    try {
-      await updateTask({ id: move.cardId, status: newStatus }).unwrap();
-    } catch (err) {
-      toast.error("Failed to move task");
-    }
-  };
-
-  const handleTaskStatusChange = async (taskId, targetStatus) => {
-    try {
-      await updateTask({ id: taskId, status: targetStatus }).unwrap();
-    } catch (err) {
-      toast.error("Failed to update status");
-    }
+    try { await updateTask({ id: move.cardId, columnId: targetColumnId }).unwrap(); }
+    catch (err) { toast.error("Failed to move task"); }
   };
 
   return (
     <DashboardLayout>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          height: "calc(100vh - 80px)",
-        }}
-      >
+      <Box sx={{ display: "flex", flexDirection: "column", height: "calc(100vh - 80px)" }}>
+        
+        {/* Workspace & Filters */}
+        <Box sx={{ display: "flex", gap: 2, p: 2, bgcolor: "background.paper", borderBottom: "1px solid", borderColor: "divider", flexWrap: "wrap" }}>
+          <FormControl size="small" sx={{ minWidth: 200 }}>
+            <InputLabel>Select Project</InputLabel>
+            <Select value={selectedProjectId} label="Select Project" onChange={(e) => setSelectedProjectId(e.target.value)}>
+              {projects.map(p => <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>)}
+            </Select>
+          </FormControl>
+          
+          <TextField size="small" placeholder="Search tasks..." value={search} onChange={(e) => setSearch(e.target.value)} />
+          
+          <FormControl size="small" sx={{ minWidth: 150 }}>
+            <InputLabel>Priority Filter</InputLabel>
+            <Select value={filterPriority} label="Priority Filter" onChange={(e) => setFilterPriority(e.target.value)}>
+              <MenuItem value="">All Priorities</MenuItem>
+              <MenuItem value="high">High</MenuItem>
+              <MenuItem value="medium">Medium</MenuItem>
+              <MenuItem value="low">Low</MenuItem>
+            </Select>
+          </FormControl>
+
+          {/* New Assignee Filter */}
+          <FormControl size="small" sx={{ minWidth: 150 }}>
+            <InputLabel>Assignee Filter</InputLabel>
+            <Select value={filterAssignee} label="Assignee Filter" onChange={(e) => setFilterAssignee(e.target.value)}>
+              <MenuItem value="">All Users</MenuItem>
+              {members.map(member => (
+                <MenuItem key={member.userId} value={member.userId}>
+                  {member.users?.firstName} {member.users?.lastName}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
+
         <TaskHeader onCreateClick={() => setCreateOpen(true)} />
 
-        <Box
-          sx={{
-            flexGrow: 1,
-            py: 4,
-            display: "flex",
-            justifyContent: "flex-start",
-            overflowX: "auto",
-            bgcolor: "background.default",
-          }}
-        >
+        <Box sx={{ flexGrow: 1, py: 4, display: "flex", justifyContent: "flex-start", overflowX: "auto", bgcolor: "background.default" }}>
           <KanbanBoard
             board={board}
             boardKey={boardKey}
-            isLoading={isLoading}
+            isLoading={tasksLoading || colsLoading}
             tasks={tasks}
             onCardMove={handleCardMove}
+            onColumnMove={handleColumnMove} 
             onTaskClick={setActiveTask}
             onTaskDelete={handleDeleteTask}
-            onTaskStatusChange={handleTaskStatusChange}
+            onTaskStatusChange={(taskId, colId) => updateTask({ id: taskId, columnId: colId })}
           />
+
         </Box>
+          {selectedProjectId && (
+            <Box sx={{ minWidth: 250, ml: 2, pt: 1 }}>
+               <Button 
+                 variant="outlined" 
+                 fullWidth 
+                 sx={{ height: 50, borderStyle: 'dashed' }}
+                 onClick={handleAddColumn}
+               >
+                 + Add Column
+               </Button>
+            </Box>
+          )}
 
-        <CreateTaskModal
-          open={createOpen}
-          onClose={() => setCreateOpen(false)}
-          onCreate={handleCreate}
-        />
-
-        <TaskDetailModal
-          activeTask={activeTask}
-          setActiveTask={setActiveTask}
-          onClose={() => setActiveTask(null)}
-          onSave={handleUpdateTask}
-          onDelete={handleDeleteTask}
-        />
+        {selectedProjectId && (
+          <CreateTaskModal open={createOpen} onClose={() => setCreateOpen(false)} onCreate={handleCreate} projectId={selectedProjectId} />
+        )}
+        <TaskDetailModal activeTask={activeTask} setActiveTask={setActiveTask} onClose={() => setActiveTask(null)} onSave={handleUpdateTask} onDelete={handleDeleteTask} />
       </Box>
     </DashboardLayout>
   );

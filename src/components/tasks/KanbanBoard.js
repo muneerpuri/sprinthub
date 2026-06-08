@@ -28,11 +28,15 @@ export default function KanbanBoard({
   tasks,
   onCardMove,
   onTaskClick,
+  onColumnMove,
   onTaskDelete,
   onTaskStatusChange,
 }) {
   const configMap = useMemo(
     () => ({
+           column: {
+        isDraggable: true,
+      },
       card: {
         render: (props) => {
           const id = props.id || props.card?.id || props.data?.id;
@@ -92,6 +96,7 @@ export default function KanbanBoard({
           configMap={configMap}
           virtualization={false}
           onCardMove={onCardMove}
+          onLaneMove={onColumnMove} 
         />
       </Box>
     </Fade>
