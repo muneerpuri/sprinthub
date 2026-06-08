@@ -96,7 +96,7 @@ export default function KanbanBoard({
           configMap={configMap}
           virtualization={false}
           onCardMove={onCardMove}
-          onLaneMove={onColumnMove} 
+          onColumnMove={onColumnMove} 
         />
       </Box>
     </Fade>

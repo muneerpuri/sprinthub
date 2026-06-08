@@ -99,15 +99,33 @@ export default function TasksPage() {
     }
   };
 
-   const handleColumnMove = async (move) => {
-    // move object usually contains { laneId, sourceIndex, destinationIndex }
+  const handleColumnMove = async (move) => {
+    // move object contains { columnId, fromIndex, toIndex } from the library
+    const { columnId, fromIndex, toIndex } = move;
+    const movedColId = columnId || move.laneId || move.id;
+
+    // 🔥 Optimistically reorder columns in the local board state so the UI
+    //    reflects the new order instantly instead of snapping back.
+    if (board && fromIndex !== undefined && toIndex !== undefined && movedColId) {
+      const updatedBoard = {
+        ...board,
+        root: {
+          ...board.root,
+          children: [...board.root.children],
+        },
+      };
+      // Remove the column from its original position
+      const [removed] = updatedBoard.root.children.splice(fromIndex, 1);
+      // Insert it at the new position
+      updatedBoard.root.children.splice(toIndex, 0, removed);
+      setBoard(updatedBoard);
+    }
+
     try {
       await updateColumn({
-        id: move.laneId || move.id,
-        order: move.destinationIndex
+        id: movedColId,
+        order: toIndex
       }).unwrap();
-      // Note: In a production app, you might need to update the `order` of ALL columns 
-      // between the sourceIndex and destinationIndex.
     } catch (err) {
       toast.error("Failed to reorder column");
     }
